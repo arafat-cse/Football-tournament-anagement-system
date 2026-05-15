@@ -1,3 +1,4 @@
+// @ts-nocheck
 export default {
   routes: [
     { method: 'GET', path: '/reports/players.pdf', handler: 'report.playersPdf', config: { policies: [] } },

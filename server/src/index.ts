@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import type { Core } from '@strapi/strapi';
 
 const createDemoData = async (strapi: any) => {

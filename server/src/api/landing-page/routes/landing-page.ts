@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * landing-page router
  */

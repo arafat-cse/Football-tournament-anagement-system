@@ -22,7 +22,7 @@
     "@strapi/plugin-users-permissions": "5.31.2",
     "@strapi/strapi": "5.31.2",
     "better-sqlite3": "^11.0.0",
-    "mysql2": "^3.15.3",
+    "mysql2": "^3.22.3",
     "pg": "^8.16.3",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

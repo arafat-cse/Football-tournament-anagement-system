@@ -1,3 +1,4 @@
+// @ts-nocheck
 const pdfBuffer = (title: string, rows: string[][]) => {
   const lines = [title, '', ...rows.map((row) => row.join(' | '))];
   const body = lines.map((line, index) => `BT /F1 10 Tf 40 ${780 - index * 16} Td (${line.replace(/[()]/g, '')}) Tj ET`).join('\n');

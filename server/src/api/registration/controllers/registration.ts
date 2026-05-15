@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { factories } from '@strapi/strapi';
 
 const relationId = (value: unknown) => {

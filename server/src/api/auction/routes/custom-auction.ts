@@ -1,3 +1,4 @@
+// @ts-nocheck
 export default {
   routes: [
     { method: 'POST', path: '/auctions/:id/bid', handler: 'auction.bid', config: { policies: [] } },

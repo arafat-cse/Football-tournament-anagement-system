@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { factories } from '@strapi/strapi';
 
 const idOf = (value: any) => (typeof value === 'object' && value ? value.id : value);

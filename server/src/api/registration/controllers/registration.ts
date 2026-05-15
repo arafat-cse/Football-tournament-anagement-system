@@ -14,6 +14,51 @@ const logAction = async (strapi: any, action: string, entity: string, entityId: 
 };
 
 export default factories.createCoreController('api::registration.registration', ({ strapi }) => ({
+  async publicCreate(ctx) {
+    const data = ctx.request.body?.data || {};
+    if (!data.name || !data.phone || !data.tournament) {
+      return ctx.badRequest('name, phone and tournament are required');
+    }
+
+    const registration = await strapi.entityService.create('api::registration.registration', {
+      data: {
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        age: data.age,
+        address: data.address,
+        role: data.role,
+        experience: data.experience,
+        basePrice: data.basePrice || 0,
+        paymentMethod: data.paymentMethod || 'bkash',
+        transactionId: data.transactionId,
+        amount: data.amount || 0,
+        paymentStatus: 'pending',
+        registrationStatus: 'pending',
+        tournament: data.tournament,
+      },
+      populate: ['tournament', 'payment'],
+    });
+
+    await strapi.entityService.create('api::payment.payment', {
+      data: {
+        method: data.paymentMethod || 'bkash',
+        transactionId: data.transactionId,
+        amount: data.amount || 0,
+        status: 'pending',
+        tournament: data.tournament,
+        registration: registration.id,
+      },
+    });
+
+    await logAction(strapi, 'registration.public_created', 'registration', registration.id, {
+      name: data.name,
+      phone: data.phone,
+    });
+
+    ctx.body = { data: registration };
+  },
+
   async approve(ctx) {
     const id = ctx.params.id;
     const registration = await strapi.entityService.findOne('api::registration.registration', id, {

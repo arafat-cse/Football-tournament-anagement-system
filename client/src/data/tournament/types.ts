@@ -51,6 +51,7 @@ export type Player = {
 };
 
 export type Registration = Player & {
+  documentId?: string;
   paymentMethod: "bkash" | "nagad" | "rocket" | "bank" | "cash" | "waived";
   transactionId: string;
   amount: number;

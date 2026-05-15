@@ -16,11 +16,14 @@
   },
   "dependencies": {
     "@types/node": "^22.5.2",
+    "aos": "^2.3.4",
+    "bootstrap": "^5.3.8",
     "concurrently": "^8.2.2",
     "typescript": "^5.0.0",
     "wait-on": "^8.0.1"
   },
   "devDependencies": {
+    "@types/aos": "^3.0.7",
     "ts-node": "^10.9.2"
   }
 }

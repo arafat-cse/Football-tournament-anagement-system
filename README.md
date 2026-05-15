@@ -54,7 +54,28 @@ Frontend API settings live in `client/.env`:
 NEXT_PUBLIC_STRAPI_API_URL=http://localhost:1337
 STRAPI_BASE_URL=http://localhost:1337
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+STRAPI_API_TOKEN=
 ```
+
+`STRAPI_API_TOKEN` is optional only if you enable Public permissions in Strapi. For local development, the easiest reliable setup is:
+
+1. Open Strapi Admin: `http://localhost:1337/admin`
+2. Go to **Settings -> API Tokens**
+3. Create a token with **Full access** for local development
+4. Put it in `client/.env`:
+
+```env
+STRAPI_API_TOKEN=your_token_here
+```
+
+5. Restart Next.js:
+
+```powershell
+cd client
+npm run dev
+```
+
+Without this token or public permissions, player registration may show an API permission error and data will not save.
 
 ## MySQL Database Create Command
 

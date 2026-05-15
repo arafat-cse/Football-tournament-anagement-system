@@ -1,0 +1,13 @@
+{
+  "kind": "collectionType",
+  "collectionName": "notifications",
+  "info": { "singularName": "notification", "pluralName": "notifications", "displayName": "Notification" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "body": { "type": "text" },
+    "audience": { "type": "enumeration", "enum": ["public", "admins", "team_owners", "players"], "default": "public" },
+    "read": { "type": "boolean", "default": false },
+    "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament" }
+  }
+}

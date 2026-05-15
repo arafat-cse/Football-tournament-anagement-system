@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tournaments",
+  "info": { "singularName": "tournament", "pluralName": "tournaments", "displayName": "Tournament" },
+  "options": { "draftAndPublish": true },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "slug": { "type": "uid", "targetField": "name", "required": true },
+    "logo": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "banner": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "sportType": { "type": "enumeration", "enum": ["football", "cricket"], "required": true },
+    "location": { "type": "string" },
+    "startDate": { "type": "date" },
+    "endDate": { "type": "date" },
+    "registrationFee": { "type": "decimal", "default": 0 },
+    "requiresPayment": { "type": "boolean", "default": true },
+    "auctionDate": { "type": "datetime" },
+    "rules": { "type": "richtext" },
+    "status": { "type": "enumeration", "enum": ["draft", "registration_open", "registration_closed", "auction", "live", "completed"], "default": "draft" },
+    "teams": { "type": "relation", "relation": "oneToMany", "target": "api::team.team", "mappedBy": "tournament" },
+    "players": { "type": "relation", "relation": "oneToMany", "target": "api::player.player", "mappedBy": "tournament" },
+    "registrations": { "type": "relation", "relation": "oneToMany", "target": "api::registration.registration", "mappedBy": "tournament" },
+    "payments": { "type": "relation", "relation": "oneToMany", "target": "api::payment.payment", "mappedBy": "tournament" },
+    "auctions": { "type": "relation", "relation": "oneToMany", "target": "api::auction.auction", "mappedBy": "tournament" },
+    "matches": { "type": "relation", "relation": "oneToMany", "target": "api::match.match", "mappedBy": "tournament" },
+    "sponsors": { "type": "relation", "relation": "oneToMany", "target": "api::sponsor.sponsor", "mappedBy": "tournament" }
+  }
+}

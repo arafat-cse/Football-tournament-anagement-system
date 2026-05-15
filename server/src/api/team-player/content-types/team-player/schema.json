@@ -1,0 +1,15 @@
+{
+  "kind": "collectionType",
+  "collectionName": "team_players",
+  "info": { "singularName": "team-player", "pluralName": "team-players", "displayName": "Team Player" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "price": { "type": "decimal", "default": 0 },
+    "source": { "type": "enumeration", "enum": ["auction", "manual_override"], "default": "auction" },
+    "assignedAt": { "type": "datetime" },
+    "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament" },
+    "team": { "type": "relation", "relation": "manyToOne", "target": "api::team.team", "inversedBy": "teamPlayers" },
+    "player": { "type": "relation", "relation": "manyToOne", "target": "api::player.player", "inversedBy": "teamPlayers" },
+    "bid": { "type": "relation", "relation": "oneToOne", "target": "api::bid.bid" }
+  }
+}

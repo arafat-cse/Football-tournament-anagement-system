@@ -1,0 +1,13 @@
+{
+  "kind": "collectionType",
+  "collectionName": "bids",
+  "info": { "singularName": "bid", "pluralName": "bids", "displayName": "Bid" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "amount": { "type": "decimal", "required": true },
+    "isWinning": { "type": "boolean", "default": false },
+    "auction": { "type": "relation", "relation": "manyToOne", "target": "api::auction.auction", "inversedBy": "bids" },
+    "player": { "type": "relation", "relation": "manyToOne", "target": "api::player.player", "inversedBy": "bids" },
+    "team": { "type": "relation", "relation": "manyToOne", "target": "api::team.team", "inversedBy": "bids" }
+  }
+}

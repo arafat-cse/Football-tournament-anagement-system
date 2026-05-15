@@ -1,0 +1,69 @@
+import Link from "next/link";
+import { CalendarDays, MapPin, Trophy, Users } from "lucide-react";
+import { formatDate } from "@/lib/utils";
+import type { Player, Team, Tournament } from "@/data/tournament/types";
+import { StatusBadge } from "./status-badge";
+
+export function TournamentCard({ tournament, href }: { tournament: Tournament; href?: string }) {
+  return (
+    <Link href={href ?? `/tournaments/${tournament.slug}`} className="group block rounded-lg border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">{tournament.sportType}</p>
+          <h3 className="mt-2 font-heading text-xl font-black text-slate-950">{tournament.name}</h3>
+        </div>
+        <StatusBadge value={tournament.status} />
+      </div>
+      <div className="mt-5 grid gap-3 text-sm text-slate-600">
+        <span className="flex items-center gap-2"><MapPin className="size-4" /> {tournament.location}</span>
+        <span className="flex items-center gap-2"><CalendarDays className="size-4" /> {formatDate(tournament.startDate)} - {formatDate(tournament.endDate)}</span>
+        <span className="flex items-center gap-2"><Users className="size-4" /> {tournament.teamCount} teams, {tournament.playerCount} players</span>
+      </div>
+    </Link>
+  );
+}
+
+export function TeamCard({ team, slug }: { team: Team; slug: string }) {
+  const remaining = team.budget - team.spent;
+  return (
+    <Link href={`/tournaments/${slug}/teams/${team.id}`} className="block rounded-lg border bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-3">
+        <span className="size-10 rounded-md border" style={{ backgroundColor: team.jerseyColor }} />
+        <div>
+          <h3 className="font-heading text-lg font-black">{team.name}</h3>
+          <p className="text-sm text-slate-500">{team.ownerName}</p>
+        </div>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+        <div className="rounded-md bg-slate-50 p-3"><span className="block text-slate-500">Budget</span><b>৳{team.budget.toLocaleString()}</b></div>
+        <div className="rounded-md bg-emerald-50 p-3"><span className="block text-slate-500">Remaining</span><b>৳{remaining.toLocaleString()}</b></div>
+      </div>
+    </Link>
+  );
+}
+
+export function PlayerRow({ player, teamName }: { player: Player; teamName?: string }) {
+  return (
+    <tr className="border-b bg-white">
+      <td className="px-4 py-3 font-semibold">{player.name}</td>
+      <td className="px-4 py-3 text-slate-600">{player.role}</td>
+      <td className="px-4 py-3 text-slate-600">৳{player.basePrice.toLocaleString()}</td>
+      <td className="px-4 py-3"><StatusBadge value={player.registrationStatus} /></td>
+      <td className="px-4 py-3"><StatusBadge value={player.paymentStatus} /></td>
+      <td className="px-4 py-3"><StatusBadge value={player.auctionStatus} /></td>
+      <td className="px-4 py-3 text-slate-600">{teamName ?? "Auction pool"}</td>
+    </tr>
+  );
+}
+
+export function StatCard({ label, value, icon: Icon }: { label: string; value: string | number; icon: typeof Trophy }) {
+  return (
+    <div className="rounded-lg border bg-white p-5 shadow-sm">
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold text-slate-500">{label}</span>
+        <Icon className="size-5 text-emerald-600" />
+      </div>
+      <div className="mt-3 font-heading text-3xl font-black">{value}</div>
+    </div>
+  );
+}

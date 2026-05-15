@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "players",
+  "info": { "singularName": "player", "pluralName": "players", "displayName": "Player" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "photo": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "phone": { "type": "string", "required": true },
+    "email": { "type": "email" },
+    "age": { "type": "integer" },
+    "address": { "type": "text" },
+    "role": { "type": "string" },
+    "experience": { "type": "text" },
+    "basePrice": { "type": "decimal", "default": 0 },
+    "auctionStatus": { "type": "enumeration", "enum": ["pool", "sold", "unsold"], "default": "pool" },
+    "registrationStatus": { "type": "enumeration", "enum": ["pending", "approved", "rejected"], "default": "pending" },
+    "paymentStatus": { "type": "enumeration", "enum": ["pending", "paid", "rejected", "refunded"], "default": "pending" },
+    "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament", "inversedBy": "players" },
+    "registration": { "type": "relation", "relation": "oneToOne", "target": "api::registration.registration", "mappedBy": "player" },
+    "teamPlayers": { "type": "relation", "relation": "oneToMany", "target": "api::team-player.team-player", "mappedBy": "player" },
+    "bids": { "type": "relation", "relation": "oneToMany", "target": "api::bid.bid", "mappedBy": "player" }
+  }
+}

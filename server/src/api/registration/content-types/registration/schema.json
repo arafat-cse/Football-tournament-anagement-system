@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "registrations",
+  "info": { "singularName": "registration", "pluralName": "registrations", "displayName": "Registration" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "phone": { "type": "string", "required": true },
+    "email": { "type": "email" },
+    "age": { "type": "integer" },
+    "address": { "type": "text" },
+    "role": { "type": "string" },
+    "experience": { "type": "text" },
+    "basePrice": { "type": "decimal", "default": 0 },
+    "photo": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "paymentMethod": { "type": "enumeration", "enum": ["bkash", "nagad", "rocket", "bank", "cash", "waived"], "default": "bkash" },
+    "transactionId": { "type": "string" },
+    "paymentScreenshot": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "amount": { "type": "decimal", "default": 0 },
+    "registrationStatus": { "type": "enumeration", "enum": ["pending", "approved", "rejected"], "default": "pending" },
+    "paymentStatus": { "type": "enumeration", "enum": ["pending", "paid", "rejected", "refunded"], "default": "pending" },
+    "rejectionReason": { "type": "text" },
+    "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament", "inversedBy": "registrations" },
+    "player": { "type": "relation", "relation": "oneToOne", "target": "api::player.player", "inversedBy": "registration" },
+    "payment": { "type": "relation", "relation": "oneToOne", "target": "api::payment.payment", "mappedBy": "registration" }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "kind": "collectionType",
+  "collectionName": "teams",
+  "info": { "singularName": "team", "pluralName": "teams", "displayName": "Team" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "slug": { "type": "uid", "targetField": "name" },
+    "logo": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "ownerName": { "type": "string" },
+    "ownerPhone": { "type": "string" },
+    "budget": { "type": "decimal", "required": true, "default": 0 },
+    "spent": { "type": "decimal", "default": 0 },
+    "jerseyColor": { "type": "string" },
+    "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament", "inversedBy": "teams" },
+    "bids": { "type": "relation", "relation": "oneToMany", "target": "api::bid.bid", "mappedBy": "team" },
+    "teamPlayers": { "type": "relation", "relation": "oneToMany", "target": "api::team-player.team-player", "mappedBy": "team" }
+  }
+}

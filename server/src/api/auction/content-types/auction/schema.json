@@ -1,0 +1,13 @@
+{
+  "kind": "collectionType",
+  "collectionName": "auctions",
+  "info": { "singularName": "auction", "pluralName": "auctions", "displayName": "Auction" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "startsAt": { "type": "datetime" },
+    "status": { "type": "enumeration", "enum": ["scheduled", "live", "paused", "completed"], "default": "scheduled" },
+    "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament", "inversedBy": "auctions" },
+    "bids": { "type": "relation", "relation": "oneToMany", "target": "api::bid.bid", "mappedBy": "auction" }
+  }
+}

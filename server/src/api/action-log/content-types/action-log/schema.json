@@ -1,0 +1,13 @@
+{
+  "kind": "collectionType",
+  "collectionName": "action_logs",
+  "info": { "singularName": "action-log", "pluralName": "action-logs", "displayName": "Action Log" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "action": { "type": "string", "required": true },
+    "entity": { "type": "string" },
+    "entityId": { "type": "string" },
+    "actorRole": { "type": "string" },
+    "details": { "type": "json" }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "kind": "collectionType",
+  "collectionName": "payments",
+  "info": { "singularName": "payment", "pluralName": "payments", "displayName": "Payment" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "method": { "type": "enumeration", "enum": ["bkash", "nagad", "rocket", "bank", "cash", "waived"], "default": "bkash" },
+    "transactionId": { "type": "string" },
+    "amount": { "type": "decimal", "required": true, "default": 0 },
+    "screenshot": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "status": { "type": "enumeration", "enum": ["pending", "paid", "rejected", "refunded"], "default": "pending" },
+    "paidAt": { "type": "datetime" },
+    "note": { "type": "text" },
+    "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament", "inversedBy": "payments" },
+    "registration": { "type": "relation", "relation": "oneToOne", "target": "api::registration.registration", "inversedBy": "payment" }
+  }
+}

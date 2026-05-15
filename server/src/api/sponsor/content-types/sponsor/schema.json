@@ -1,0 +1,13 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sponsors",
+  "info": { "singularName": "sponsor", "pluralName": "sponsors", "displayName": "Sponsor" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "name": { "type": "string", "required": true },
+    "logo": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
+    "website": { "type": "string" },
+    "tier": { "type": "enumeration", "enum": ["title", "gold", "silver", "partner"], "default": "partner" },
+    "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament", "inversedBy": "sponsors" }
+  }
+}

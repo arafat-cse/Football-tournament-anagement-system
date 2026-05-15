@@ -1,0 +1,17 @@
+{
+  "kind": "collectionType",
+  "collectionName": "matches",
+  "info": { "singularName": "match", "pluralName": "matches", "displayName": "Match" },
+  "options": { "draftAndPublish": false },
+  "attributes": {
+    "title": { "type": "string", "required": true },
+    "startsAt": { "type": "datetime" },
+    "venue": { "type": "string" },
+    "status": { "type": "enumeration", "enum": ["scheduled", "live", "completed", "cancelled"], "default": "scheduled" },
+    "homeScore": { "type": "string" },
+    "awayScore": { "type": "string" },
+    "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament", "inversedBy": "matches" },
+    "homeTeam": { "type": "relation", "relation": "manyToOne", "target": "api::team.team" },
+    "awayTeam": { "type": "relation", "relation": "manyToOne", "target": "api::team.team" }
+  }
+}

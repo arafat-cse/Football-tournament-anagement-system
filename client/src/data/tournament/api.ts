@@ -102,8 +102,8 @@ export async function getTeams(slug?: string) {
   return [];
 }
 
-export async function getTeam(teamId: string | number) {
-  const all = await getTeams();
+export async function getTeam(teamId: string | number, slug?: string) {
+  const all = await getTeams(slug);
   return all.find((team) => String(team.id) === String(teamId)) ?? null;
 }
 
@@ -147,7 +147,14 @@ export async function getPlayers(slug?: string) {
 
 export async function getTeamPlayers(slug?: string, teamId?: string | number): Promise<TeamPlayer[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const remote = await fetchStrapi<any[]>("/team-players?populate=team,player,tournament&sort=assignedAt:desc&pagination[pageSize]=1000");
+  const remote =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (await fetchStrapi<any[]>(`/public-team-players${slug || teamId ? `?${new URLSearchParams({
+      ...(slug ? { tournamentSlug: slug } : {}),
+      ...(teamId ? { team: String(teamId) } : {}),
+    }).toString()}` : ""}`)) ??
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (await fetchStrapi<any[]>("/team-players?populate=team,player,player.photo,tournament&sort=assignedAt:desc&pagination[pageSize]=1000"));
   if (remote?.length) {
     const all = remote.map((item): TeamPlayer => {
       const flat = flatten(item);

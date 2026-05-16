@@ -19,7 +19,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       <main>{children}</main>
       <footer className="border-t bg-white">
         <div className="container flex flex-col gap-2 py-8 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
-          <span>Football and cricket tournament operations platform.</span>
+          <span>Football tournament operations platform.</span>
           <span>বাংলা-friendly forms, reports and auction workflow.</span>
         </div>
       </footer>

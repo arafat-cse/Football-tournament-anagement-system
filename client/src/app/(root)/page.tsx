@@ -17,7 +17,7 @@ export default async function Home() {
       <section className="bg-[linear-gradient(135deg,#052e2b,#166534_52%,#f8fafc_52%)]">
         <div className="container grid min-h-[560px] items-center gap-8 py-12 lg:grid-cols-[1.05fr_.95fr]">
           <div className="max-w-2xl text-white">
-            <p className="text-sm font-black uppercase tracking-wide text-lime-200">Football and cricket operations</p>
+            <p className="text-sm font-black uppercase tracking-wide text-lime-200">Football operations</p>
             <h1 className="mt-4 font-heading text-5xl font-black leading-tight md:text-7xl">TournamentPro</h1>
             <p className="mt-5 max-w-xl text-lg text-emerald-50">
               Manage registrations, manual payments, approvals, team budgets, auctions, squads and exportable reports from one clean workspace.

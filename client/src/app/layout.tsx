@@ -17,7 +17,7 @@ const fontHeading = Nunito({
 
 export const metadata: Metadata = {
   title: "TournamentPro",
-  description: "Football and cricket tournament management platform",
+  description: "Football tournament management platform",
 };
 
 export default async function RootLayout({

@@ -8,7 +8,7 @@
     "slug": { "type": "uid", "targetField": "name", "required": true },
     "logo": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
     "banner": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
-    "sportType": { "type": "enumeration", "enum": ["football", "cricket"], "required": true },
+    "sportType": { "type": "enumeration", "enum": ["football"], "required": true },
     "location": { "type": "string" },
     "startDate": { "type": "date" },
     "endDate": { "type": "date" },

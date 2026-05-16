@@ -1,4 +1,4 @@
-export type SportType = "football" | "cricket";
+export type SportType = "football";
 export type TournamentStatus = "draft" | "registration_open" | "registration_closed" | "auction" | "live" | "completed";
 export type RegistrationStatus = "pending" | "approved" | "rejected";
 export type PaymentStatus = "pending" | "paid" | "rejected" | "refunded";

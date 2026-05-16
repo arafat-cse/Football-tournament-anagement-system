@@ -1,6 +1,6 @@
 # TournamentPro
 
-Full-stack football/cricket tournament management platform built with Next.js App Router, TypeScript, Tailwind CSS, Strapi 5 and MySQL.
+Full-stack football tournament management platform built with Next.js App Router, TypeScript, Tailwind CSS, Strapi 5 and MySQL.
 
 ## What is included
 

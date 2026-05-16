@@ -3,7 +3,7 @@ import { getStrapiURL } from "@/lib/utils";
 import { getAuthToken } from "./get-auth-token";
 export async function getUserMeLoader() {
   const baseUrl = getStrapiURL();
-  const path = "/api/users/me";
+  const path = "/api/users/me?populate=role";
 
   const url = new URL(path, baseUrl);
 

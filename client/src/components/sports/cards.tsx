@@ -78,14 +78,26 @@ export function PlayerRow({ player, teamName, detailsHref }: { player: Player; t
   );
 }
 
-export function StatCard({ label, value, icon: Icon }: { label: string; value: string | number; icon: typeof Trophy }) {
-  return (
-    <div className="rounded-lg border bg-white p-5 shadow-sm">
+export function StatCard({ label, value, icon: Icon, href }: { label: string; value: string | number; icon: typeof Trophy; href?: string }) {
+  const content = (
+    <>
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold text-slate-500">{label}</span>
         <Icon className="size-5 text-emerald-600" />
       </div>
       <div className="mt-3 font-heading text-3xl font-black">{value}</div>
-    </div>
+    </>
   );
+
+  const className = "rounded-lg border bg-white p-5 shadow-sm block transition hover:-translate-y-0.5 hover:shadow-md";
+
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className={className}>{content}</div>;
 }

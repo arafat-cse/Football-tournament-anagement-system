@@ -12,10 +12,10 @@ export default async function DashboardRoute() {
         <h1 className="font-heading text-3xl font-black">Dashboard</h1>
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Tournaments" value={stats.tournaments} icon={Trophy} />
-        <StatCard label="Registrations" value={stats.registrations} icon={Users} />
-        <StatCard label="Pending approval" value={stats.pendingRegistrations} icon={ShieldCheck} />
-        <StatCard label="Revenue" value={`৳${stats.revenue.toLocaleString()}`} icon={CreditCard} />
+        <StatCard label="Tournaments" value={stats.tournaments} icon={Trophy} href="/dashboard/tournaments" />
+        <StatCard label="Registrations" value={stats.registrations} icon={Users} href="/dashboard/registrations" />
+        <StatCard label="Pending approval" value={stats.pendingRegistrations} icon={ShieldCheck} href="/dashboard/registrations" />
+        <StatCard label="Revenue" value={`৳${stats.revenue.toLocaleString()}`} icon={CreditCard} href="/dashboard/payments" />
       </div>
       <div className="mt-6 rounded-lg border bg-white p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between">

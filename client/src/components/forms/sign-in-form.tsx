@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { loginUserAction } from "@/data/actions";
 import type { AuthActionState } from "@/data/actions/auth";
+import { Eye, EyeOff } from "lucide-react";
 
 import {
   CardTitle,
@@ -30,6 +31,8 @@ const INITIAL_STATE: AuthActionState = {
 
 export function SigninForm() {
   const [formState, formAction] = useActionState(loginUserAction, INITIAL_STATE);
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className="w-full max-w-md">
       <form action={formAction}>
@@ -51,8 +54,37 @@ export function SigninForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" placeholder="password" />
+              <div className="relative">
+                <Input 
+                  id="password" 
+                  name="password" 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="password" 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               <ZodErrors error={formState.zodErrors?.password} />
+            </div>
+            
+            <div className="flex items-center space-x-2 pt-2">
+              <input
+                type="checkbox"
+                id="remember"
+                name="remember"
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <Label 
+                htmlFor="remember" 
+                className="text-sm font-medium leading-none cursor-pointer"
+              >
+                Remember me
+              </Label>
             </div>
           </CardContent>
           <CardFooter className="flex flex-col">

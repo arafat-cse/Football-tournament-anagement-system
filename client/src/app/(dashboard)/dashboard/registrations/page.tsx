@@ -29,7 +29,7 @@ export default async function RegistrationsPage() {
                 <td className="px-4 py-3">{item.transactionId}</td>
                 <td className="px-4 py-3">
                   <RegistrationStatusControls
-                    approveId={item.id}
+                    approveId={item.documentId ?? item.id}
                     paymentId={item.documentId ?? item.id}
                     paymentStatus={item.paymentStatus}
                     registrationStatus={item.registrationStatus}

@@ -8,8 +8,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { id } = await params;
   const { paymentStatus = "paid" } = await request.json().catch(() => ({}));
 
-  const response = await fetch(`${strapiUrl}/api/registrations/${id}`, {
-    method: "PUT",
+  const response = await fetch(`${strapiUrl}/api/registrations/${id}/payment`, {
+    method: "POST",
     headers: await getStrapiAuthHeaders(),
     body: JSON.stringify({ data: { paymentStatus } }),
   });

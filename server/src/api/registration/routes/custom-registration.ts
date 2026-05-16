@@ -25,5 +25,11 @@ export default {
       handler: 'registration.reject',
       config: { policies: [] },
     },
+    {
+      method: 'POST',
+      path: '/registrations/:id/payment',
+      handler: 'registration.payment',
+      config: { policies: [] },
+    },
   ],
 };

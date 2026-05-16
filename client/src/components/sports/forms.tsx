@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { CheckCircle2, Download, Loader2, Share2, Upload } from "lucide-react";
 
 const inputClass = "h-11 rounded-md border bg-white px-3 text-sm outline-none ring-emerald-600/20 focus:ring-4";
@@ -23,10 +23,21 @@ type CardData = {
 function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image();
-    image.crossOrigin = "anonymous";
+    if (!src.startsWith("blob:") && !src.startsWith("data:")) {
+      image.crossOrigin = "anonymous";
+    }
     image.onload = () => resolve(image);
     image.onerror = reject;
     image.src = src;
+  });
+}
+
+function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
 }
 
@@ -37,61 +48,80 @@ async function createCardBlob(card: CardData) {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas not supported");
 
-  const gradient = ctx.createLinearGradient(0, 0, 1080, 1350);
-  gradient.addColorStop(0, "#052e2b");
-  gradient.addColorStop(0.54, "#16a34a");
-  gradient.addColorStop(1, "#f8fafc");
-  ctx.fillStyle = gradient;
+  ctx.fillStyle = "#071c18";
   ctx.fillRect(0, 0, 1080, 1350);
 
-  ctx.fillStyle = "rgba(255,255,255,0.96)";
-  ctx.roundRect(80, 90, 920, 1170, 36);
+  const glow = ctx.createRadialGradient(840, 180, 40, 840, 180, 720);
+  glow.addColorStop(0, "rgba(34,197,94,0.7)");
+  glow.addColorStop(1, "rgba(34,197,94,0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, 1080, 1350);
+
+  ctx.fillStyle = "#f8fafc";
+  ctx.roundRect(86, 86, 908, 1178, 42);
   ctx.fill();
+  ctx.strokeStyle = "#bbf7d0";
+  ctx.lineWidth = 5;
+  ctx.stroke();
 
-  ctx.fillStyle = "#064e3b";
-  ctx.font = "900 54px Arial";
-  ctx.fillText("PLAYER REGISTRATION", 130, 180);
+  ctx.fillStyle = "#052e2b";
+  ctx.roundRect(126, 126, 828, 132, 30);
+  ctx.fill();
+  ctx.fillStyle = "#dcfce7";
+  ctx.font = "900 48px Arial";
+  ctx.textAlign = "left";
+  ctx.fillText("PLAYER REGISTRATION", 166, 204);
 
-  ctx.fillStyle = "#64748b";
-  ctx.font = "700 28px Arial";
-  ctx.fillText("TournamentPro", 130, 225);
+  ctx.fillStyle = "#86efac";
+  ctx.font = "700 26px Arial";
+  ctx.fillText(card.tournamentName, 166, 240, 760);
 
+  const x = 250;
+  const y = 318;
+  const size = 580;
   if (card.photoUrl) {
-    const image = await loadImage(card.photoUrl);
-    const size = 520;
-    const x = 280;
-    const y = 285;
-    ctx.save();
-    ctx.beginPath();
-    ctx.roundRect(x, y, size, size, 28);
-    ctx.clip();
-    ctx.drawImage(image, x, y, size, size);
-    ctx.restore();
+    try {
+      const image = await loadImage(card.photoUrl);
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x, y, size, size, 38);
+      ctx.clip();
+      ctx.drawImage(image, x, y, size, size);
+      ctx.restore();
+      ctx.strokeStyle = "#16a34a";
+      ctx.lineWidth = 8;
+      ctx.roundRect(x, y, size, size, 38);
+      ctx.stroke();
+    } catch {
+      ctx.fillStyle = "#ecfdf5";
+      ctx.roundRect(x, y, size, size, 38);
+      ctx.fill();
+    }
   } else {
-    ctx.fillStyle = "#dcfce7";
-    ctx.roundRect(280, 285, 520, 520, 28);
+    ctx.fillStyle = "#ecfdf5";
+    ctx.roundRect(x, y, size, size, 38);
     ctx.fill();
   }
 
   ctx.fillStyle = "#0f172a";
-  ctx.font = "900 72px Arial";
+  ctx.font = "900 74px Arial";
   ctx.textAlign = "center";
-  ctx.fillText(card.name, 540, 900, 820);
+  ctx.fillText(card.name, 540, 990, 830);
 
   ctx.fillStyle = "#16a34a";
-  ctx.font = "800 42px Arial";
-  ctx.fillText(card.role, 540, 970, 820);
+  ctx.font = "900 44px Arial";
+  ctx.fillText(card.role, 540, 1056, 820);
 
-  ctx.fillStyle = "#334155";
-  ctx.font = "700 34px Arial";
-  ctx.fillText(`Age: ${card.age || "-"}`, 540, 1030);
+  ctx.fillStyle = "#475569";
+  ctx.font = "700 32px Arial";
+  ctx.fillText(`Age: ${card.age || "-"}`, 540, 1112);
 
-  ctx.fillStyle = "#f0fdf4";
-  ctx.roundRect(130, 1090, 820, 100, 22);
+  ctx.fillStyle = "#dcfce7";
+  ctx.roundRect(146, 1160, 788, 92, 24);
   ctx.fill();
   ctx.fillStyle = "#064e3b";
-  ctx.font = "900 34px Arial";
-  ctx.fillText(`Registered for ${card.tournamentName}`, 540, 1153, 760);
+  ctx.font = "900 32px Arial";
+  ctx.fillText("OFFICIAL REGISTRATION CARD", 540, 1218, 740);
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -135,14 +165,15 @@ function PlayerShareCard({ card }: { card: CardData }) {
 
   return (
     <div className="grid gap-5 lg:grid-cols-[420px_1fr]">
-      <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-emerald-100 bg-white shadow-sm">
         <div className="bg-emerald-950 p-5 text-white">
           <p className="text-xs font-black uppercase tracking-wide text-lime-200">Player registration</p>
           <h2 className="mt-2 font-heading text-2xl font-black">{card.name}</h2>
         </div>
         <div className="p-5">
-          <div className="aspect-[4/5] overflow-hidden rounded-lg bg-emerald-50">
-            {card.photoUrl ? <img src={card.photoUrl} alt={card.name} className="h-full w-full object-cover" /> : null}
+          <div className="aspect-[4/5] overflow-hidden rounded-lg bg-emerald-50 ring-1 ring-emerald-100">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {card.photoUrl ? <img src={card.photoUrl} alt={card.name} className="h-full w-full object-cover" /> : <div className="grid h-full place-items-center text-sm font-bold text-emerald-700">No photo selected</div>}
           </div>
           <div className="mt-4 grid gap-2 text-sm">
             <div className="flex justify-between rounded-md bg-slate-50 p-3"><span>Role</span><b>{card.role}</b></div>
@@ -183,9 +214,17 @@ export function RegistrationForm({
   tournamentName: string;
 }) {
   const [submittedCard, setSubmittedCard] = useState<CardData | null>(null);
+  const [photoPreview, setPhotoPreview] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
-  const photoUrlRef = useRef("");
+
+  async function updatePhotoPreview(file: File | null) {
+    if (!file || file.size === 0) {
+      setPhotoPreview("");
+      return;
+    }
+    setPhotoPreview(await fileToDataUrl(file));
+  }
 
   async function submitRegistration(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -199,9 +238,10 @@ export function RegistrationForm({
     formData.set("amount", String(fee));
 
     const photo = formData.get("photo");
-    if (photo instanceof File && photo.size > 0) {
-      if (photoUrlRef.current) URL.revokeObjectURL(photoUrlRef.current);
-      photoUrlRef.current = URL.createObjectURL(photo);
+    let cardPhotoUrl = photoPreview;
+    if (photo instanceof File && photo.size > 0 && !cardPhotoUrl) {
+      cardPhotoUrl = await fileToDataUrl(photo);
+      setPhotoPreview(cardPhotoUrl);
     }
 
     let response: Response;
@@ -229,7 +269,7 @@ export function RegistrationForm({
       role: String(formData.get("role") ?? ""),
       age: String(formData.get("age") ?? ""),
       tournamentName,
-      photoUrl: photoUrlRef.current,
+      photoUrl: cardPhotoUrl,
     });
   }
 
@@ -253,10 +293,15 @@ export function RegistrationForm({
       <textarea className="min-h-24 rounded-md border bg-white px-3 py-2 text-sm outline-none ring-emerald-600/20 focus:ring-4 md:col-span-2" name="address" placeholder="Address" />
       <textarea className="min-h-24 rounded-md border bg-white px-3 py-2 text-sm outline-none ring-emerald-600/20 focus:ring-4 md:col-span-2" name="experience" placeholder="Experience" />
 
-      <label className="flex h-24 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed bg-slate-50 text-sm font-semibold text-slate-600 md:col-span-2">
-        <Upload className="size-4" />
-        Upload player photo
-        <input className="hidden" name="photo" type="file" accept="image/*" />
+      <label className="grid min-h-32 cursor-pointer place-items-center gap-3 rounded-md border border-dashed bg-slate-50 p-4 text-sm font-semibold text-slate-600 md:col-span-2">
+        {photoPreview ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={photoPreview} alt="Player preview" className="h-40 w-40 rounded-md object-cover" />
+        ) : (
+          <span className="inline-flex items-center gap-2"><Upload className="size-4" /> Upload player photo</span>
+        )}
+        <span className="text-xs text-slate-500">{photoPreview ? "Click to change photo" : "Preview will show here"}</span>
+        <input className="hidden" name="photo" type="file" accept="image/*" onChange={(event) => updatePhotoPreview(event.currentTarget.files?.[0] ?? null)} />
       </label>
 
       <select className={inputClass} name="paymentMethod" defaultValue="bkash">

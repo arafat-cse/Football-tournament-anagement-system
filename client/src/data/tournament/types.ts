@@ -28,8 +28,19 @@ export type Team = {
   ownerPhone: string;
   budget: number;
   spent: number;
+  registrationStatus?: RegistrationStatus;
   jerseyColor: string;
   tournamentSlug: string;
+};
+
+export type TeamPlayer = {
+  id: number;
+  teamId: number;
+  tournamentSlug: string;
+  player: Player;
+  price: number;
+  source: "auction" | "manual_override";
+  assignedAt?: string;
 };
 
 export type Player = {
@@ -41,6 +52,7 @@ export type Player = {
   address: string;
   role: string;
   experience: string;
+  photoUrl?: string;
   basePrice: number;
   finalPrice?: number;
   teamId?: number;

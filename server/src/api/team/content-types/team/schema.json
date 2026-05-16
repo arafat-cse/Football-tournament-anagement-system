@@ -11,6 +11,7 @@
     "ownerPhone": { "type": "string" },
     "budget": { "type": "decimal", "required": true, "default": 0 },
     "spent": { "type": "decimal", "default": 0 },
+    "registrationStatus": { "type": "enumeration", "enum": ["pending", "approved", "rejected"], "default": "pending" },
     "jerseyColor": { "type": "string" },
     "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament", "inversedBy": "teams" },
     "bids": { "type": "relation", "relation": "oneToMany", "target": "api::bid.bid", "mappedBy": "team" },

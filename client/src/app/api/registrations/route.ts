@@ -33,8 +33,10 @@ async function uploadFile(file: File | null) {
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-    const photoId = await uploadFile(formData.get("photo") as File | null);
-    const screenshotId = await uploadFile(formData.get("paymentScreenshot") as File | null);
+    const photo = formData.get("photo") as File | null;
+    const screenshot = formData.get("paymentScreenshot") as File | null;
+    const photoId = await uploadFile(photo);
+    const screenshotId = await uploadFile(screenshot);
 
     const data: Record<string, unknown> = {
       name: formData.get("name"),
@@ -56,13 +58,20 @@ export async function POST(request: Request) {
     };
 
     const endpoint = token ? `${strapiUrl}/api/registrations` : `${strapiUrl}/api/public-registrations`;
+    const publicBody = new FormData();
+    publicBody.append("data", JSON.stringify(data));
+    if (photo instanceof File && photo.size > 0) publicBody.append("photo", photo, photo.name);
+    if (screenshot instanceof File && screenshot.size > 0) publicBody.append("paymentScreenshot", screenshot, screenshot.name);
+
     const registrationResponse = await fetch(endpoint, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...headers(),
-      },
-      body: JSON.stringify({ data }),
+      headers: token
+        ? {
+            "Content-Type": "application/json",
+            ...headers(),
+          }
+        : undefined,
+      body: token ? JSON.stringify({ data }) : publicBody,
     });
 
     const registrationPayload = await registrationResponse.json().catch(() => null);

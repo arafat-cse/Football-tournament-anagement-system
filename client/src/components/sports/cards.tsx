@@ -45,7 +45,19 @@ export function TeamCard({ team, slug }: { team: Team; slug: string }) {
 export function PlayerRow({ player, teamName }: { player: Player; teamName?: string }) {
   return (
     <tr className="border-b bg-white">
-      <td className="px-4 py-3 font-semibold">{player.name}</td>
+      <td className="px-4 py-3 font-semibold">
+        <div className="flex items-center gap-3">
+          <div className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-md bg-emerald-50 text-sm font-black text-emerald-700 ring-1 ring-emerald-100">
+            {player.photoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={player.photoUrl} alt={player.name} className="h-full w-full object-cover" />
+            ) : (
+              player.name.slice(0, 1).toUpperCase()
+            )}
+          </div>
+          <span>{player.name}</span>
+        </div>
+      </td>
       <td className="px-4 py-3 text-slate-600">{player.role}</td>
       <td className="px-4 py-3 text-slate-600">৳{player.basePrice.toLocaleString()}</td>
       <td className="px-4 py-3"><StatusBadge value={player.registrationStatus} /></td>

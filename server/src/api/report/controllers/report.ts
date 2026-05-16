@@ -70,8 +70,9 @@ export default {
       limit: 1000,
     });
 
+    const title = team && squad[0]?.team?.name ? `${squad[0].team.name} - Assigned Player List` : 'Team Wise Assigned Player List';
     const rows = squad.map((item: any) => [item.team?.name || '-', item.player?.name || '-', item.player?.role || '-', String(item.price || 0), item.source]);
-    sendPdf(ctx, 'Team Wise Squad', [['Team', 'Player', 'Role', 'Price', 'Source'], ...rows]);
+    sendPdf(ctx, title, [['Team', 'Player', 'Role', 'Price', 'Source'], ...rows]);
   },
 
   async registrationsExcel(ctx: any) {

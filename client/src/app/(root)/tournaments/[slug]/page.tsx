@@ -11,7 +11,8 @@ export default async function TournamentPage({ params }: { params: Promise<{ slu
   const tournament = await getTournamentBySlug(slug);
   if (!tournament) notFound();
   const [teams, players] = await Promise.all([getTeams(slug), getPlayers(slug)]);
-  const sold = players.filter((player) => player.auctionStatus === "sold").length;
+  const approvedPlayers = players.filter((player) => player.registrationStatus === "approved");
+  const sold = approvedPlayers.filter((player) => player.auctionStatus === "sold").length;
 
   return (
     <div>
@@ -22,12 +23,13 @@ export default async function TournamentPage({ params }: { params: Promise<{ slu
           <div className="mt-6 grid gap-3 text-sm text-slate-200 md:grid-cols-4">
             <span className="flex items-center gap-2"><MapPin className="size-4" /> {tournament.location}</span>
             <span className="flex items-center gap-2"><CalendarDays className="size-4" /> {formatDate(tournament.startDate)}</span>
-            <span className="flex items-center gap-2"><Users className="size-4" /> {players.length} registrations</span>
+            <span className="flex items-center gap-2"><Users className="size-4" /> {approvedPlayers.length} approved players</span>
             <span className="flex items-center gap-2"><Gavel className="size-4" /> {sold} sold players</span>
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link className="rounded-md bg-emerald-500 px-5 py-3 text-sm font-bold text-white" href={`/tournaments/${slug}/register`}>Register player</Link>
-            <Link className="rounded-md border border-white/30 px-5 py-3 text-sm font-bold" href={`/tournaments/${slug}/auction`}>Auction results</Link>
+            <Link className="rounded-md border border-white/30 px-5 py-3 text-sm font-bold" href={`/tournaments/${slug}/players`}>Register Player List</Link>
+            <Link className="rounded-md border border-white/30 px-5 py-3 text-sm font-bold" href={`/tournaments/${slug}/teams`}>Teams</Link>
           </div>
         </div>
       </section>

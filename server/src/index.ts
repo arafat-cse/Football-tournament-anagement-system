@@ -27,13 +27,13 @@ const createDemoData = async (strapi: any) => {
 
   const teams = await Promise.all([
     strapi.entityService.create('api::team.team', {
-      data: { name: 'Mirpur Strikers', slug: 'mirpur-strikers', ownerName: 'Rahim Uddin', ownerPhone: '01711000001', budget: 50000, spent: 0, jerseyColor: '#16a34a', tournament: tournament.id },
+      data: { name: 'Mirpur Strikers', slug: 'mirpur-strikers', ownerName: 'Rahim Uddin', ownerPhone: '01711000001', budget: 50000, spent: 0, registrationStatus: 'approved', jerseyColor: '#16a34a', tournament: tournament.id },
     }),
     strapi.entityService.create('api::team.team', {
-      data: { name: 'Gulshan Royals', slug: 'gulshan-royals', ownerName: 'Nadia Ahmed', ownerPhone: '01711000002', budget: 50000, spent: 0, jerseyColor: '#2563eb', tournament: tournament.id },
+      data: { name: 'Gulshan Royals', slug: 'gulshan-royals', ownerName: 'Nadia Ahmed', ownerPhone: '01711000002', budget: 50000, spent: 0, registrationStatus: 'approved', jerseyColor: '#2563eb', tournament: tournament.id },
     }),
     strapi.entityService.create('api::team.team', {
-      data: { name: 'Old Dhaka Titans', slug: 'old-dhaka-titans', ownerName: 'Sajid Khan', ownerPhone: '01711000003', budget: 50000, spent: 0, jerseyColor: '#f97316', tournament: tournament.id },
+      data: { name: 'Old Dhaka Titans', slug: 'old-dhaka-titans', ownerName: 'Sajid Khan', ownerPhone: '01711000003', budget: 50000, spent: 0, registrationStatus: 'approved', jerseyColor: '#f97316', tournament: tournament.id },
     }),
   ]);
 

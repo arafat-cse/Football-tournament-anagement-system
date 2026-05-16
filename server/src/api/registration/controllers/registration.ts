@@ -13,9 +13,62 @@ const logAction = async (strapi: any, action: string, entity: string, entityId: 
   });
 };
 
+const parseData = (value: any) => {
+  if (typeof value !== 'string') return value || {};
+  try {
+    return JSON.parse(value);
+  } catch {
+    return {};
+  }
+};
+
+const pickFile = (files: any, key: string) => {
+  const file = files?.[key];
+  return Array.isArray(file) ? file[0] : file;
+};
+
+const uploadRequestFile = async (strapi: any, file: any) => {
+  if (!file) return undefined;
+  const uploaded = await strapi.plugin('upload').service('upload').upload({
+    data: {},
+    files: file,
+  });
+  return uploaded?.[0]?.id;
+};
+
 export default factories.createCoreController('api::registration.registration', ({ strapi }) => ({
+  async publicFind(ctx) {
+    const { tournamentSlug } = ctx.query;
+    const filters: any = {};
+
+    if (tournamentSlug) {
+      const tournaments = await strapi.entityService.findMany('api::tournament.tournament', {
+        filters: { slug: tournamentSlug },
+        limit: 1,
+      });
+      if (!tournaments.length) {
+        ctx.body = { data: [] };
+        return;
+      }
+      filters.tournament = tournaments[0].id;
+    }
+
+    const registrations = await strapi.entityService.findMany('api::registration.registration', {
+      filters,
+      populate: ['tournament', 'player', 'photo'],
+      sort: ['createdAt:desc'],
+      limit: 1000,
+    });
+
+    ctx.body = { data: registrations };
+  },
+
   async publicCreate(ctx) {
-    const data = ctx.request.body?.data || {};
+    const data = parseData(ctx.request.body?.data || ctx.request.body);
+    const files = ctx.request.files || {};
+    const photoId = await uploadRequestFile(strapi, pickFile(files, 'photo'));
+    const screenshotId = await uploadRequestFile(strapi, pickFile(files, 'paymentScreenshot'));
+
     if (!data.name || !data.phone || !data.tournament) {
       return ctx.badRequest('name, phone and tournament are required');
     }
@@ -36,6 +89,8 @@ export default factories.createCoreController('api::registration.registration', 
         paymentStatus: 'pending',
         registrationStatus: 'pending',
         tournament: data.tournament,
+        photo: data.photo || photoId,
+        paymentScreenshot: data.paymentScreenshot || screenshotId,
       },
       populate: ['tournament', 'payment'],
     });
@@ -48,6 +103,7 @@ export default factories.createCoreController('api::registration.registration', 
         status: 'pending',
         tournament: data.tournament,
         registration: registration.id,
+        screenshot: screenshotId,
       },
     });
 
@@ -62,7 +118,7 @@ export default factories.createCoreController('api::registration.registration', 
   async approve(ctx) {
     const id = ctx.params.id;
     const registration = await strapi.entityService.findOne('api::registration.registration', id, {
-      populate: ['tournament', 'player'],
+      populate: ['tournament', 'player', 'photo'],
     });
 
     if (!registration) return ctx.notFound('Registration not found');
@@ -88,6 +144,7 @@ export default factories.createCoreController('api::registration.registration', 
           auctionStatus: 'pool',
           tournament: relationId(tournament),
           registration: id,
+          photo: relationId(registration.photo),
         },
       });
     } else {

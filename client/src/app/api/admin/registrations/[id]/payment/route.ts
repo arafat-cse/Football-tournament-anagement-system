@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
+import { getStrapiAuthHeaders } from "@/data/services/strapi-auth-headers";
 import { getStrapiURL } from "@/lib/utils";
 
 const strapiUrl = (process.env.STRAPI_BASE_URL || process.env.NEXT_PUBLIC_STRAPI_BASE_URL || getStrapiURL()).replace("localhost", "127.0.0.1");
-const token = process.env.STRAPI_API_TOKEN;
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -10,10 +10,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const response = await fetch(`${strapiUrl}/api/registrations/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    headers: await getStrapiAuthHeaders(),
     body: JSON.stringify({ data: { paymentStatus } }),
   });
 

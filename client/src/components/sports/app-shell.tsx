@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { BarChart3, CreditCard, FileDown, Gavel, LayoutDashboard, ShieldCheck, Trophy, Users } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { getUserMeLoader } from "@/data/services/user";
+import { DashboardShellClient } from "./dashboard-shell-client";
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
@@ -37,47 +38,9 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-const nav = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
-  { href: "/dashboard/registrations", label: "Registrations", icon: ShieldCheck },
-  { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
-  { href: "/dashboard/auction", label: "Auction", icon: Gavel },
-  { href: "/dashboard/reports", label: "Reports", icon: FileDown },
-];
-
 export async function DashboardShell({ children }: { children: React.ReactNode }) {
   const userResponse = await getUserMeLoader();
   const user = userResponse.data;
 
-  return (
-    <div className="min-h-screen bg-slate-100 text-slate-950">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r bg-slate-950 text-white lg:block">
-        <div className="flex h-16 items-center gap-2 px-5 font-heading text-lg font-black">
-          <BarChart3 className="size-5 text-emerald-400" />
-          Admin Console
-        </div>
-        <nav className="space-y-1 px-3">
-          {nav.map((item) => (
-            <Link key={item.href} href={item.href} className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-slate-300 hover:bg-white/10 hover:text-white">
-              <item.icon className="size-4" />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-10 border-b bg-white">
-          <div className="flex min-h-16 items-center justify-between gap-4 px-4 md:px-8">
-            <Link href="/" className="font-heading text-base font-black">TournamentPro</Link>
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-              <Users className="size-4" />
-              {user?.username ?? "Guest User"}
-            </div>
-          </div>
-        </header>
-        <main className="px-4 py-6 md:px-8">{children}</main>
-      </div>
-    </div>
-  );
+  return <DashboardShellClient username={user?.username ?? "Guest User"}>{children}</DashboardShellClient>;
 }

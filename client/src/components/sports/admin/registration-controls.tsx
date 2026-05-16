@@ -37,7 +37,7 @@ export function RegistrationStatusControls({
   }
 
   return (
-    <div className="flex min-w-52 flex-col gap-2">
+    <div className="flex w-full min-w-0 flex-col gap-2 min-[420px]:w-auto min-[420px]:min-w-52">
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge value={paymentStatus} />
         <button

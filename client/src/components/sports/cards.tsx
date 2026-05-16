@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, MapPin, Trophy, Users } from "lucide-react";
+import { CalendarDays, Eye, MapPin, Trophy, Users } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import type { Player, Team, Tournament } from "@/data/tournament/types";
 import { StatusBadge } from "./status-badge";
@@ -42,7 +42,7 @@ export function TeamCard({ team, slug }: { team: Team; slug: string }) {
   );
 }
 
-export function PlayerRow({ player, teamName }: { player: Player; teamName?: string }) {
+export function PlayerRow({ player, teamName, detailsHref }: { player: Player; teamName?: string; detailsHref?: string }) {
   return (
     <tr className="border-b bg-white">
       <td className="px-4 py-3 font-semibold">
@@ -64,6 +64,16 @@ export function PlayerRow({ player, teamName }: { player: Player; teamName?: str
       <td className="px-4 py-3"><StatusBadge value={player.paymentStatus} /></td>
       <td className="px-4 py-3"><StatusBadge value={player.auctionStatus} /></td>
       <td className="px-4 py-3 text-slate-600">{teamName ?? "Auction pool"}</td>
+      {detailsHref ? (
+        <td className="px-4 py-3">
+          <Link
+            href={detailsHref}
+            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+          >
+            <Eye className="size-4" /> View
+          </Link>
+        </td>
+      ) : null}
     </tr>
   );
 }

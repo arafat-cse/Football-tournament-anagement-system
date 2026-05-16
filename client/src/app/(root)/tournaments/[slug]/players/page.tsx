@@ -21,13 +21,20 @@ export default async function PlayersPage({ params }: { params: Promise<{ slug: 
       <div className="mt-6 overflow-hidden rounded-lg border">
         <table className="w-full min-w-[900px] text-left text-sm">
           <thead className="bg-slate-100 text-xs uppercase text-slate-500">
-            <tr><th className="px-4 py-3">Name</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Base</th><th className="px-4 py-3">Registration</th><th className="px-4 py-3">Payment</th><th className="px-4 py-3">Auction</th><th className="px-4 py-3">Team</th></tr>
+            <tr><th className="px-4 py-3">Name</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Base</th><th className="px-4 py-3">Registration</th><th className="px-4 py-3">Payment</th><th className="px-4 py-3">Auction</th><th className="px-4 py-3">Team</th><th className="px-4 py-3">Action</th></tr>
           </thead>
           <tbody>
-            {registrations.map((registration) => <PlayerRow key={registration.id} player={registration} teamName={teamName(registration.teamId)} />)}
+            {registrations.map((registration) => (
+              <PlayerRow
+                key={registration.id}
+                player={registration}
+                teamName={teamName(registration.teamId)}
+                detailsHref={`/tournaments/${slug}/players/${registration.id}`}
+              />
+            ))}
             {!registrations.length ? (
               <tr className="border-b bg-white">
-                <td className="px-4 py-8 text-center text-slate-500" colSpan={7}>No registrations yet.</td>
+                <td className="px-4 py-8 text-center text-slate-500" colSpan={8}>No registrations yet.</td>
               </tr>
             ) : null}
           </tbody>

@@ -1,12 +1,23 @@
 // @ts-nocheck
-const pdfBuffer = (title: string, rows: string[][]) => {
-  const lines = [title, '', ...rows.map((row) => row.join(' | '))];
-  const body = lines.map((line, index) => `BT /F1 10 Tf 40 ${780 - index * 16} Td (${line.replace(/[()]/g, '')}) Tj ET`).join('\n');
+const pdfBuffer = (title: string, rows: string[][], isTeamPdf: boolean = false) => {
+  const tableLines = rows.map((row) => row.join(' | '));
+  let body = '';
+  
+  if (isTeamPdf) {
+    const xPos = Math.max(40, 297 - (title.length * 4.5)); // Approximate center
+    body += `BT /F2 16 Tf ${xPos} 780 Td (${title.replace(/[()]/g, '')}) Tj ET\n`;
+    body += tableLines.map((line, index) => `BT /F1 10 Tf 40 ${740 - index * 16} Td (${line.replace(/[()]/g, '')}) Tj ET`).join('\n');
+  } else {
+    const lines = [title, '', ...tableLines];
+    body = lines.map((line, index) => `BT /F1 10 Tf 40 ${780 - index * 16} Td (${line.replace(/[()]/g, '')}) Tj ET`).join('\n');
+  }
+
   return Buffer.from(`%PDF-1.4
 1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj
 2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj
-3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj
+3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 6 0 R >> >> /Contents 5 0 R >> endobj
 4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj
+6 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >> endobj
 5 0 obj << /Length ${body.length} >> stream
 ${body}
 endstream endobj
@@ -25,10 +36,10 @@ const excelXml = (sheetName: string, columns: { header: string; key: string }[],
 </Workbook>`);
 };
 
-const sendPdf = (ctx: any, title: string, rows: string[][]) => {
+const sendPdf = (ctx: any, title: string, rows: string[][], isTeamPdf: boolean = false) => {
   ctx.set('Content-Type', 'application/pdf');
   ctx.set('Content-Disposition', `attachment; filename="${title.toLowerCase().replace(/\s+/g, '-')}.pdf"`);
-  ctx.body = pdfBuffer(title, rows);
+  ctx.body = pdfBuffer(title, rows, isTeamPdf);
 };
 
 const sendWorkbook = (ctx: any, filename: string, sheetName: string, columns: { header: string; key: string }[], rows: any[]) => {
@@ -70,9 +81,10 @@ export default {
       limit: 1000,
     });
 
-    const title = team && squad[0]?.team?.name ? `${squad[0].team.name} - Assigned Player List` : 'Team Wise Assigned Player List';
+    const isSingleTeam = team && squad[0]?.team?.name;
+    const title = isSingleTeam ? squad[0].team.name : 'Team Wise Assigned Player List';
     const rows = squad.map((item: any) => [item.team?.name || '-', item.player?.name || '-', item.player?.role || '-', String(item.price || 0), item.source]);
-    sendPdf(ctx, title, [['Team', 'Player', 'Role', 'Price', 'Source'], ...rows]);
+    sendPdf(ctx, title, [['Team', 'Player', 'Role', 'Price', 'Source'], ...rows], Boolean(isSingleTeam));
   },
 
   async registrationsExcel(ctx: any) {

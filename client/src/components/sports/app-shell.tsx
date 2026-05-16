@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BarChart3, CreditCard, FileDown, Gavel, LayoutDashboard, ShieldCheck, Trophy, Users } from "lucide-react";
+import { getUserMeLoader } from "@/data/services/user";
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
   return (
@@ -45,7 +46,10 @@ const nav = [
   { href: "/dashboard/reports", label: "Reports", icon: FileDown },
 ];
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export async function DashboardShell({ children }: { children: React.ReactNode }) {
+  const userResponse = await getUserMeLoader();
+  const user = userResponse.data;
+
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950">
       <aside className="fixed inset-y-0 left-0 hidden w-64 border-r bg-slate-950 text-white lg:block">
@@ -68,7 +72,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <Link href="/" className="font-heading text-base font-black">TournamentPro</Link>
             <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
               <Users className="size-4" />
-              Role-ready RBAC dashboard
+              {user?.username ?? "Guest User"}
             </div>
           </div>
         </header>

@@ -89,3 +89,15 @@ export type Auction = {
   startsAt: string;
   bids: Bid[];
 };
+
+export type SponsorTier = "title" | "gold" | "silver" | "partner";
+
+export type Sponsor = {
+  id: number;
+  name: string;
+  logoUrl?: string;
+  website?: string;
+  tier: SponsorTier;
+  tournamentSlug?: string;
+  isActive?: boolean;
+};

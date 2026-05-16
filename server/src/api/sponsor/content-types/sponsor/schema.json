@@ -1,13 +1,50 @@
 {
   "kind": "collectionType",
   "collectionName": "sponsors",
-  "info": { "singularName": "sponsor", "pluralName": "sponsors", "displayName": "Sponsor" },
-  "options": { "draftAndPublish": false },
+  "info": {
+    "singularName": "sponsor",
+    "pluralName": "sponsors",
+    "displayName": "Sponsor"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
   "attributes": {
-    "name": { "type": "string", "required": true },
-    "logo": { "type": "media", "multiple": false, "allowedTypes": ["images"] },
-    "website": { "type": "string" },
-    "tier": { "type": "enumeration", "enum": ["title", "gold", "silver", "partner"], "default": "partner" },
-    "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament", "inversedBy": "sponsors" }
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "logo": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images"
+      ]
+    },
+    "website": {
+      "type": "string"
+    },
+    "tier": {
+      "type": "enumeration",
+      "default": "partner",
+      "enum": [
+        "title",
+        "gold",
+        "silver",
+        "partner"
+      ]
+    },
+    "tournament": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::tournament.tournament",
+      "inversedBy": "sponsors"
+    },
+    "is_active": {
+      "type": "boolean",
+      "required": false,
+      "default": true
+    }
   }
 }

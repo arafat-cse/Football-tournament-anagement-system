@@ -3,14 +3,19 @@ import { notFound } from "next/navigation";
 import { CalendarDays, Gavel, MapPin, Users } from "lucide-react";
 import { TeamCard } from "@/components/sports/cards";
 import { StatusBadge } from "@/components/sports/status-badge";
-import { getPlayers, getTeams, getTournamentBySlug } from "@/data/tournament/api";
+import { getPlayers, getSponsors, getTeams, getTournamentBySlug } from "@/data/tournament/api";
 import { formatDate } from "@/lib/utils";
+import { SponsorSection } from "@/components/sports/sponsor-section";
 
 export default async function TournamentPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const tournament = await getTournamentBySlug(slug);
   if (!tournament) notFound();
-  const [teams, players] = await Promise.all([getTeams(slug), getPlayers(slug)]);
+  const [teams, players, sponsors] = await Promise.all([
+    getTeams(slug), 
+    getPlayers(slug),
+    getSponsors(slug)
+  ]);
   const approvedPlayers = players.filter((player) => player.registrationStatus === "approved");
   const sold = approvedPlayers.filter((player) => player.auctionStatus === "sold").length;
 
@@ -42,21 +47,28 @@ export default async function TournamentPage({ params }: { params: Promise<{ slu
           </div>
         </div>
       </section>
-      <section className="container grid gap-8 py-10 lg:grid-cols-[1fr_320px]">
-        <div>
-          <h2 className="font-heading text-2xl font-black">Teams</h2>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            {teams.map((team) => <TeamCard key={team.id} team={team} slug={slug} />)}
+      <section className="container py-10">
+        <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+          <div>
+            <h2 className="font-heading text-2xl font-black">Teams</h2>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {teams.map((team) => <TeamCard key={team.id} team={team} slug={slug} />)}
+            </div>
           </div>
+          <aside className="rounded-lg border bg-white p-5 shadow-sm">
+            <h2 className="font-heading text-xl font-black">Rules</h2>
+            <div 
+              className="mt-3 text-sm leading-6 text-slate-600 prose prose-slate max-w-none"
+              dangerouslySetInnerHTML={{ __html: tournament.rules }}
+            />
+            <dl className="mt-5 grid gap-3 text-sm border-t pt-5">
+              <div className="flex justify-between"><dt>Registration fee</dt><dd className="font-bold text-emerald-700">৳{tournament.registrationFee}</dd></div>
+              <div className="flex justify-between"><dt>Auction date</dt><dd className="font-bold">{formatDate(tournament.auctionDate)}</dd></div>
+            </dl>
+          </aside>
         </div>
-        <aside className="rounded-lg border bg-white p-5 shadow-sm">
-          <h2 className="font-heading text-xl font-black">Rules</h2>
-          <p className="mt-3 text-sm leading-6 text-slate-600">{tournament.rules}</p>
-          <dl className="mt-5 grid gap-3 text-sm">
-            <div className="flex justify-between"><dt>Registration fee</dt><dd className="font-bold">৳{tournament.registrationFee}</dd></div>
-            <div className="flex justify-between"><dt>Auction date</dt><dd className="font-bold">{formatDate(tournament.auctionDate)}</dd></div>
-          </dl>
-        </aside>
+        
+        <SponsorSection sponsors={sponsors} />
       </section>
     </div>
   );

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { registerUserAction } from "@/data/actions";
+import type { AuthActionState } from "@/data/actions/auth";
 
 import {
   CardTitle,
@@ -20,16 +21,15 @@ import { StrapiErrors } from "@/components/custom/strapi-errors";
 import { SubmitButton } from "@/components/custom/submit-button";
 import { ProviderAuthLink } from "@/components/custom/provider-auth-button";
 
-const INITIAL_STATE = {
+const INITIAL_STATE: AuthActionState = {
   data: null,
   zodErrors: null,
+  strapiErrors: null,
   message: null,
 };
 
 export function SignupForm() {
   const [formState, formAction] = useActionState(registerUserAction, INITIAL_STATE);
-
-  console.log(formState, "client");
 
   return (
     <div className="w-full max-w-md">

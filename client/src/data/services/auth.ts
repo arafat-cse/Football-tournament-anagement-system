@@ -46,6 +46,6 @@ export async function loginUserService(userData: LoginUserProps) {
     return response.json();
   } catch (error) {
     console.error("Login Service Error:", error);
-    throw error;
+    return null;
   }
 }

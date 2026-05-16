@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { loginUserAction } from "@/data/actions";
+import type { AuthActionState } from "@/data/actions/auth";
 
 import {
   CardTitle,
@@ -20,7 +21,7 @@ import { StrapiErrors } from "@/components/custom/strapi-errors";
 import { SubmitButton } from "@/components/custom/submit-button";
 import { ProviderAuthLink } from "@/components/custom/provider-auth-button";
 
-const INITIAL_STATE = {
+const INITIAL_STATE: AuthActionState = {
   zodErrors: null,
   strapiErrors: null,
   data: null,
@@ -35,7 +36,7 @@ export function SigninForm() {
         <Card className="border-none">
           <CardHeader className="space-y-1">
             <CardTitle className="text-3xl font-bold">Sign In</CardTitle>
-            <CardDescription>Enter your details to sign in to your account</CardDescription>
+            <CardDescription>Use your Strapi Users & Permissions account</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">

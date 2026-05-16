@@ -5,10 +5,16 @@ import { redirect } from "next/navigation";
 
 import { registerUserService, loginUserService } from "@/data/services";
 
-const config = {
+export type AuthActionState = {
+  zodErrors: Record<string, string[] | undefined> | null;
+  strapiErrors: { message?: string | null; name?: string; status?: string | number | null } | null;
+  data: unknown;
+  message: string | null;
+};
+
+const cookieConfig = {
   maxAge: 60 * 60 * 24 * 7, // 1 week
   path: "/",
-  domain: process.env.HOST ?? "localhost",
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
 };
@@ -25,7 +31,7 @@ const schemaRegister = z.object({
   }),
 });
 
-export async function registerUserAction(prevState: any, formData: FormData) {
+export async function registerUserAction(prevState: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const validatedFields = schemaRegister.safeParse({
     username: formData.get("username"),
     password: formData.get("password"),
@@ -62,7 +68,7 @@ export async function registerUserAction(prevState: any, formData: FormData) {
   }
 
   const cookieStore = await cookies();
-  cookieStore.set("jwt", responseData.jwt, config);
+  cookieStore.set("jwt", responseData.jwt, cookieConfig);
   redirect("/dashboard");
 }
 
@@ -72,7 +78,7 @@ const schemaLogin = z.object({
     .min(3, {
       message: "Identifier must have at least 3 or more characters",
     })
-    .max(20, {
+    .max(100, {
       message: "Please enter a valid username or email address",
     }),
   password: z
@@ -85,7 +91,7 @@ const schemaLogin = z.object({
     }),
 });
 
-export async function loginUserAction(prevState: any, formData: FormData) {
+export async function loginUserAction(prevState: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const validatedFields = schemaLogin.safeParse({
     identifier: formData.get("identifier"),
     password: formData.get("password"),
@@ -104,7 +110,7 @@ export async function loginUserAction(prevState: any, formData: FormData) {
   if (!responseData) {
     return {
       ...prevState,
-      strapiErrors: responseData.error,
+      strapiErrors: { message: "Could not connect to Strapi. Please run the backend server and try again." },
       zodErrors: null,
       message: "Ops! Something went wrong. Please try again.",
     };
@@ -119,12 +125,12 @@ export async function loginUserAction(prevState: any, formData: FormData) {
     };
   }
   const cookieStore = await cookies();
-  cookieStore.set("jwt", responseData.jwt, config);
+  cookieStore.set("jwt", responseData.jwt, cookieConfig);
   redirect("/dashboard");
 }
 
 export async function logoutAction() {
   const cookieStore = await cookies();
-  cookieStore.set("jwt", "", { ...config, maxAge: 0 });
+  cookieStore.set("jwt", "", { ...cookieConfig, maxAge: 0 });
   redirect("/");
 }

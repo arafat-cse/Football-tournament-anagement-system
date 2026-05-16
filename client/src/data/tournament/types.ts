@@ -83,11 +83,9 @@ export type Bid = {
 
 export type Auction = {
   id: number;
-  title: string;
   tournamentSlug: string;
-  status: "scheduled" | "live" | "paused" | "completed";
-  startsAt: string;
-  bids: Bid[];
+  displayStatus: "live" | "completed";
+  player?: Player;
 };
 
 export type SponsorTier = "title" | "gold" | "silver" | "partner";

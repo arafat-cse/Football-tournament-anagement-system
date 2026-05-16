@@ -117,4 +117,12 @@ export default factories.createCoreController('api::auction.auction', ({ strapi 
     await logAction(strapi, 'auction.player_unsold', 'player', playerId);
     ctx.body = { data: player };
   },
+
+  async publicFind(ctx) {
+    const auctions = await strapi.documents('api::auction.auction').findMany({
+      ...ctx.query,
+      populate: ['player', 'player.photo', 'tournament'],
+    });
+    ctx.body = { data: auctions };
+  },
 }));

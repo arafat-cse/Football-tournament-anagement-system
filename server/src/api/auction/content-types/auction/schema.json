@@ -1,13 +1,36 @@
 {
   "kind": "collectionType",
   "collectionName": "auctions",
-  "info": { "singularName": "auction", "pluralName": "auctions", "displayName": "Auction" },
-  "options": { "draftAndPublish": false },
+  "info": {
+    "singularName": "auction",
+    "pluralName": "auctions",
+    "displayName": "Auction"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
   "attributes": {
-    "title": { "type": "string", "required": true },
-    "startsAt": { "type": "datetime" },
-    "status": { "type": "enumeration", "enum": ["scheduled", "live", "paused", "completed"], "default": "scheduled" },
-    "tournament": { "type": "relation", "relation": "manyToOne", "target": "api::tournament.tournament", "inversedBy": "auctions" },
-    "bids": { "type": "relation", "relation": "oneToMany", "target": "api::bid.bid", "mappedBy": "auction" }
+    "title": {
+      "type": "string"
+    },
+    "displayStatus": {
+      "type": "enumeration",
+      "enum": [
+        "live",
+        "completed"
+      ],
+      "default": "live"
+    },
+    "tournament": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::tournament.tournament",
+      "inversedBy": "auctions"
+    },
+    "player": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::player.player"
+    }
   }
 }

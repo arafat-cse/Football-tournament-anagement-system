@@ -44,6 +44,7 @@ export default async function TournamentPage({ params }: { params: Promise<{ slu
             )}
             <Link className="rounded-md border border-white/30 px-5 py-3 text-sm font-bold transition hover:bg-white/10" href={`/tournaments/${slug}/players`}>Register Player List</Link>
             <Link className="rounded-md border border-white/30 px-5 py-3 text-sm font-bold transition hover:bg-white/10" href={`/tournaments/${slug}/teams`}>Teams</Link>
+            <Link className="rounded-md bg-amber-500/10 border border-amber-500/30 px-5 py-3 text-sm font-bold text-amber-400 transition hover:bg-amber-500/20" href={`/tournaments/${slug}/auction`}>Live Auction</Link>
           </div>
         </div>
       </section>

@@ -1,12 +1,14 @@
 import { StatusBadge } from "@/components/sports/status-badge";
-import { getPlayers, getTeams } from "@/data/tournament/api";
+import { TeamPlayerAssignmentForm } from "@/components/sports/admin/team-player-assignment-form";
+import { getPlayers, getTeams, getTournaments } from "@/data/tournament/api";
 
 export default async function DashboardAuctionPage() {
-  const [players, teams] = await Promise.all([getPlayers(), getTeams()]);
+  const [players, teams, tournaments] = await Promise.all([getPlayers(), getTeams(), getTournaments()]);
   const teamName = (id?: number) => teams.find((team) => team.id === id)?.name ?? "Open";
   return (
     <div>
       <h1 className="font-heading text-3xl font-black">Auction control</h1>
+      <TeamPlayerAssignmentForm tournaments={tournaments} teams={teams} players={players} />
       <div className="mt-6 grid gap-4 xl:grid-cols-2">
         {players.filter((item) => item.registrationStatus === "approved").map((player) => (
           <div key={player.id} className="rounded-lg border bg-white p-5 shadow-sm">

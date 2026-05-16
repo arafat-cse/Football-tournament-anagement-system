@@ -6,7 +6,7 @@ import { formatDate } from "@/lib/utils";
 
 export default async function TeamDetailPage({ params }: { params: Promise<{ slug: string; teamId: string }> }) {
   const { slug, teamId } = await params;
-  const [team, squad] = await Promise.all([getTeam(teamId), getTeamPlayers(slug, teamId)]);
+  const [team, squad] = await Promise.all([getTeam(teamId, slug), getTeamPlayers(slug, teamId)]);
   if (!team) notFound();
 
   return (

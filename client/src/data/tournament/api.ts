@@ -60,6 +60,7 @@ export async function getTournaments(): Promise<Tournament[]> {
       endDate: flat.endDate ?? "",
       registrationFee: Number(flat.registrationFee ?? 0),
       registrationInstruction: flat.registrationInstruction ?? "",
+      bannerUrl: mediaUrl(flat.banner),
       requiresPayment: Boolean(flat.requiresPayment ?? true),
       auctionDate: flat.auctionDate ?? "",
       rules: flat.rules ?? "",
@@ -250,34 +251,30 @@ export async function getTournamentRelationId(slug: string) {
 
 export async function getAuctions(slug?: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const remote = await fetchStrapi<any[]>("/auctions?populate=tournament,bids,bids.player,bids.team&sort=startsAt:desc&pagination[pageSize]=100");
+  const remote = await fetchStrapi<any[]>("/public-auctions");
   if (!remote?.length) return [];
 
   const all = remote.map((item): Auction => {
     const flat = flatten(item);
     const tournament = flattenRelation(flat.tournament);
-    const rawBids = flat.bids?.data ?? flat.bids ?? [];
-    const bids: Bid[] = Array.isArray(rawBids)
-      ? rawBids.map((bidItem) => {
-          const bid = flatten(bidItem);
-          return {
-            id: bid.id,
-            auctionId: relationId(flat) ?? flat.id,
-            playerId: relationId(flattenRelation(bid.player)) ?? 0,
-            teamId: relationId(flattenRelation(bid.team)) ?? 0,
-            amount: Number(bid.amount ?? 0),
-            isWinning: Boolean(bid.isWinning),
-          };
-        })
-      : [];
+    const player = flattenRelation(flat.player);
 
     return {
       id: flat.id,
-      title: flat.title ?? "",
       tournamentSlug: tournament?.slug ?? "",
-      status: flat.status ?? "scheduled",
-      startsAt: flat.startsAt ?? "",
-      bids,
+      displayStatus: flat.displayStatus ?? "live",
+      player: player ? {
+        id: player.id,
+        name: player.name,
+        photoUrl: mediaUrl(player.photo),
+        basePrice: Number(player.basePrice ?? 0),
+        role: player.role ?? "",
+        experience: player.experience ?? "",
+        registrationStatus: player.registrationStatus ?? "approved",
+        paymentStatus: player.paymentStatus ?? "paid",
+        auctionStatus: player.auctionStatus ?? "pool",
+        tournamentSlug: tournament?.slug ?? "",
+      } : undefined,
     };
   });
 

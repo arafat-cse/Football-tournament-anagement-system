@@ -6,8 +6,8 @@
   "attributes": {
     "amount": { "type": "decimal", "required": true },
     "isWinning": { "type": "boolean", "default": false },
-    "auction": { "type": "relation", "relation": "manyToOne", "target": "api::auction.auction", "inversedBy": "bids" },
-    "player": { "type": "relation", "relation": "manyToOne", "target": "api::player.player", "inversedBy": "bids" },
-    "team": { "type": "relation", "relation": "manyToOne", "target": "api::team.team", "inversedBy": "bids" }
+    "auction": { "type": "relation", "relation": "manyToOne", "target": "api::auction.auction" },
+    "player": { "type": "relation", "relation": "manyToOne", "target": "api::player.player" },
+    "team": { "type": "relation", "relation": "manyToOne", "target": "api::team.team" }
   }
 }

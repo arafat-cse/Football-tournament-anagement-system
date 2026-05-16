@@ -1,5 +1,5 @@
 import { getStrapiMedia, getStrapiURL } from "@/lib/utils";
-import type { Auction, Bid, Player, Registration, Team, TeamPlayer, Tournament } from "./types";
+import type { Auction, Bid, Player, Registration, Sponsor, Team, TeamPlayer, Tournament } from "./types";
 
 const apiUrl = (process.env.NEXT_PUBLIC_STRAPI_API_URL || process.env.STRAPI_BASE_URL || getStrapiURL()).replace("localhost", "127.0.0.1");
 const token = process.env.STRAPI_API_TOKEN;
@@ -109,7 +109,7 @@ export async function getTeam(teamId: string | number, slug?: string) {
 
 export async function getPlayers(slug?: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const remote = await fetchStrapi<any[]>("/players?populate=*&sort=createdAt:desc&pagination[pageSize]=100");
+  const remote = await fetchStrapi<any[]>("/public-players?sort=createdAt:desc&pagination[pageSize]=100");
   if (remote?.length) {
     const all = remote.map((item): Player => {
       const flat = flatten(item);
@@ -301,4 +301,26 @@ export async function getDashboardStats() {
     soldPlayers: players.filter((item) => item.auctionStatus === "sold").length,
     revenue: registrations.filter((item) => item.paymentStatus === "paid").reduce((sum, item) => sum + item.amount, 0),
   };
+}
+
+export async function getSponsors(slug?: string): Promise<Sponsor[]> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const remote = await fetchStrapi<any[]>("/public-sponsors?sort=tier:asc");
+  if (!remote?.length) return [];
+
+  const all = remote.map((item): Sponsor => {
+    const flat = flatten(item);
+    const tournament = flattenRelation(flat.tournament);
+    return {
+      id: flat.id,
+      name: flat.name,
+      logoUrl: mediaUrl(flat.logo),
+      website: flat.website ?? undefined,
+      tier: flat.tier ?? "partner",
+      tournamentSlug: tournament?.slug ?? undefined,
+      isActive: Boolean(flat.is_active),
+    };
+  });
+
+  return slug ? all.filter((s) => s.tournamentSlug === slug) : all;
 }

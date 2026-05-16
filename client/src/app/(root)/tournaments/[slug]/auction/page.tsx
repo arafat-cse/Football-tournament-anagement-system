@@ -12,14 +12,29 @@ export default async function AuctionPage({ params }: { params: Promise<{ slug: 
   const player = liveAuction?.player;
 
   return (
-    <div className="container py-12">
-      <div className="mb-10 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-          <Gavel className="size-8" />
+    <div className="pb-20">
+      <div className="relative h-30 w-full overflow-hidden bg-slate-900 md:h-56">
+        {tournament.bannerUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={tournament.bannerUrl} alt={tournament.name} className="h-full w-full object-cover opacity-50" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-slate-950/60" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p className="font-heading text-5xl font-black text-white md:text-4xl">Player Auction</p>
         </div>
-        <h1 className="font-heading text-4xl font-black">{tournament.name}</h1>
-        <p className="mt-2 text-slate-500">Live Player Auction Session</p>
       </div>
+
+      <div className="container relative -mt-10 mb-10 text-center">
+        <div className="inline-block rounded-2xl bg-white px-8 py-6 shadow-xl ring-1 ring-slate-100">
+          <h1 className="font-heading text-3xl font-black text-slate-900 md:text-4xl">{tournament.name}</h1>
+          <div className="mt-2 flex items-center justify-center gap-2">
+            <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Live Player Auction Session</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="container">
 
       {!liveAuction ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 py-20 text-center">
@@ -79,7 +94,7 @@ export default async function AuctionPage({ params }: { params: Promise<{ slug: 
                       </div>
                       <div>
                         <h4 className="font-bold text-emerald-900">Auction Pool</h4>
-                        <p className="text-sm text-emerald-700">Currently available for bidding. Teams can pick this player for their squad.</p>
+                        <p className="text-sm text-emerald-700">বর্তমানে নিলামের জন্য উপলব্ধ। দলগুলো তাদের স্কোয়াডের জন্য এই খেলোয়াড়কে বেছে নিতে পারে।</p>
                       </div>
                     </div>
                   </div>
@@ -99,6 +114,7 @@ export default async function AuctionPage({ params }: { params: Promise<{ slug: 
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

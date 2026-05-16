@@ -14,6 +14,7 @@ export type Tournament = {
   endDate: string;
   registrationFee: number;
   registrationInstruction: string;
+  bannerUrl?: string;
   requiresPayment: boolean;
   auctionDate: string;
   rules: string;

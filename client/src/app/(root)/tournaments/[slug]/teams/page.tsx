@@ -20,7 +20,13 @@ export default async function TeamsPage({ params }: { params: Promise<{ slug: st
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {teams.map((team) => <TeamCard key={team.id} team={team} slug={slug} />)}
       </div>
-      <TeamRegistrationForm tournamentId={tournament.id} />
+      {tournament.status === "registration_open" ? (
+        <TeamRegistrationForm tournamentId={tournament.id} />
+      ) : (
+        <div className="mt-10 rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 p-10 text-center">
+          <p className="font-heading text-lg font-bold text-slate-500">Team registration is currently closed for this tournament.</p>
+        </div>
+      )}
     </section>
   );
 }

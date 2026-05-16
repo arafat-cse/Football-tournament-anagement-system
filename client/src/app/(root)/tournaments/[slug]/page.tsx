@@ -27,9 +27,18 @@ export default async function TournamentPage({ params }: { params: Promise<{ slu
             <span className="flex items-center gap-2"><Gavel className="size-4" /> {sold} sold players</span>
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link className="rounded-md bg-emerald-500 px-5 py-3 text-sm font-bold text-white" href={`/tournaments/${slug}/register`}>Register player</Link>
-            <Link className="rounded-md border border-white/30 px-5 py-3 text-sm font-bold" href={`/tournaments/${slug}/players`}>Register Player List</Link>
-            <Link className="rounded-md border border-white/30 px-5 py-3 text-sm font-bold" href={`/tournaments/${slug}/teams`}>Teams</Link>
+            {tournament.status === "registration_open" ? (
+              <Link className="rounded-md bg-emerald-500 px-5 py-3 text-sm font-bold text-white shadow-lg transition hover:bg-emerald-600" href={`/tournaments/${slug}/register`}>
+                Register player
+              </Link>
+            ) : (
+              <div className="flex items-center gap-2 rounded-md bg-slate-800 px-5 py-3 text-sm font-bold text-slate-400 ring-1 ring-slate-700">
+                <span className="size-2 animate-pulse rounded-full bg-red-500" />
+                Registration closed
+              </div>
+            )}
+            <Link className="rounded-md border border-white/30 px-5 py-3 text-sm font-bold transition hover:bg-white/10" href={`/tournaments/${slug}/players`}>Register Player List</Link>
+            <Link className="rounded-md border border-white/30 px-5 py-3 text-sm font-bold transition hover:bg-white/10" href={`/tournaments/${slug}/teams`}>Teams</Link>
           </div>
         </div>
       </section>

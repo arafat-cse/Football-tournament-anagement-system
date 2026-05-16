@@ -12,13 +12,20 @@ export default async function RegisterPage({ params }: { params: Promise<{ slug:
         <p className="text-sm font-bold uppercase text-emerald-700">{tournament.name}</p>
         <h1 className="font-heading text-4xl font-black">Player registration</h1>
       </div>
-      <RegistrationForm
-        fee={tournament.registrationFee}
-        registrationInstruction={tournament.registrationInstruction}
-        tournamentId={tournament.id}
-        tournamentSlug={slug}
-        tournamentName={tournament.name}
-      />
+      {tournament.status === "registration_open" ? (
+        <RegistrationForm
+          fee={tournament.registrationFee}
+          registrationInstruction={tournament.registrationInstruction}
+          tournamentId={tournament.id}
+          tournamentSlug={slug}
+          tournamentName={tournament.name}
+        />
+      ) : (
+        <div className="rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
+          <h2 className="font-heading text-2xl font-black text-slate-800">Registration is closed</h2>
+          <p className="mt-2 text-slate-600">This tournament is no longer accepting new player registrations.</p>
+        </div>
+      )}
     </section>
   );
 }

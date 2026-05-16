@@ -38,7 +38,7 @@ const flattenRelation = (value: any) => (value?.data ? flatten(value.data) : val
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mediaUrl = (value: any) => {
   const media = flattenRelation(value);
-  const url = media?.formats?.thumbnail?.url ?? media?.url;
+  const url = media?.url ?? media?.formats?.thumbnail?.url;
   return url ? getStrapiMedia(url) ?? undefined : undefined;
 };
 
@@ -211,7 +211,7 @@ export async function getRegistrations(slug?: string) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (await fetchStrapi<any[]>(`/public-registrations${slug ? `?tournamentSlug=${encodeURIComponent(slug)}` : ""}`)) ??
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (await fetchStrapi<any[]>("/registrations?populate=tournament&sort=createdAt:desc&pagination[pageSize]=100"));
+    (await fetchStrapi<any[]>("/registrations?populate=tournament,photo&sort=createdAt:desc&pagination[pageSize]=100"));
   if (remote?.length) {
     const all = remote.map((item): Registration => {
       const flat = flatten(item);

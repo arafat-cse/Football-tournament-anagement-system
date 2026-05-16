@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, CreditCard, FileDown, Gavel, LayoutDashboard, ShieldCheck, Trophy, Users } from "lucide-react";
+import { BarChart3, CreditCard, FileDown, Gavel, Image, LayoutDashboard, ShieldCheck, Trophy, Users } from "lucide-react";
 import { getUserMeLoader } from "@/data/services/user";
 
 export function PublicShell({ children }: { children: React.ReactNode }) {
@@ -41,6 +41,7 @@ const nav = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/tournaments", label: "Tournaments", icon: Trophy },
   { href: "/dashboard/registrations", label: "Registrations", icon: ShieldCheck },
+  { href: "/dashboard/photo-card", label: "Photo Card", icon: Image },
   { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
   { href: "/dashboard/auction", label: "Auction", icon: Gavel },
   { href: "/dashboard/reports", label: "Reports", icon: FileDown },

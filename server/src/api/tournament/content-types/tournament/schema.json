@@ -13,6 +13,7 @@
     "startDate": { "type": "date" },
     "endDate": { "type": "date" },
     "registrationFee": { "type": "decimal", "default": 0 },
+    "registrationInstruction": { "type": "richtext" },
     "requiresPayment": { "type": "boolean", "default": true },
     "auctionDate": { "type": "datetime" },
     "rules": { "type": "richtext" },

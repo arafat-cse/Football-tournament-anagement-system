@@ -59,6 +59,7 @@ export async function getTournaments(): Promise<Tournament[]> {
       startDate: flat.startDate ?? "",
       endDate: flat.endDate ?? "",
       registrationFee: Number(flat.registrationFee ?? 0),
+      registrationInstruction: flat.registrationInstruction ?? "",
       requiresPayment: Boolean(flat.requiresPayment ?? true),
       auctionDate: flat.auctionDate ?? "",
       rules: flat.rules ?? "",

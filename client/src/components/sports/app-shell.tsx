@@ -19,8 +19,17 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
       <main>{children}</main>
       <footer className="border-t bg-white">
         <div className="container flex flex-col gap-2 py-8 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
-          <span>Football tournament operations platform.</span>
-          <span>বাংলা-friendly forms, reports and auction workflow.</span>
+          <span className="font-medium">Football tournament operations platform.</span>
+          <div className="flex items-center gap-1.5">
+            <span className="opacity-75">Developed by</span>
+            <Link 
+              href="https://mandsitbd.com" 
+              target="_blank" 
+              className="font-bold tracking-tight text-emerald-600 transition-colors hover:text-emerald-700"
+            >
+              Mandsitbd.com
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

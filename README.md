@@ -283,21 +283,9 @@ Your `server/.env` password does not match your MySQL user password. Change this
 DATABASE_PASSWORD=your_actual_mysql_password
 ```
 
-## Seed/Demo Data
+## Dynamic Data
 
-The backend bootstrap creates a demo tournament, teams, registrations, payments, players and auction data unless this env value is set:
-
-```env
-SEED_DEMO_DATA=false
-```
-
-To allow demo data, keep it unset or set:
-
-```env
-SEED_DEMO_DATA=true
-```
-
-The frontend also has fallback demo data, so public pages can load even before Strapi is fully connected.
+All tournament, team, registration, player, auction and dashboard data is loaded from Strapi. The app no longer creates demo records on backend bootstrap and the frontend does not keep local sample data.
 
 ## API Notes
 

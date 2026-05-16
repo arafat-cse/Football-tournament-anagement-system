@@ -1,6 +1,5 @@
 import { getStrapiMedia, getStrapiURL } from "@/lib/utils";
-import { auctions, players, registrations, teams, tournaments } from "./mock";
-import type { Player, Registration, Team, TeamPlayer } from "./types";
+import type { Auction, Bid, Player, Registration, Team, TeamPlayer, Tournament } from "./types";
 
 const apiUrl = (process.env.NEXT_PUBLIC_STRAPI_API_URL || process.env.STRAPI_BASE_URL || getStrapiURL()).replace("localhost", "127.0.0.1");
 const token = process.env.STRAPI_API_TOKEN;
@@ -43,11 +42,31 @@ const mediaUrl = (value: any) => {
   return url ? getStrapiMedia(url) ?? undefined : undefined;
 };
 
-export async function getTournaments() {
+export async function getTournaments(): Promise<Tournament[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const remote = await fetchStrapi<any[]>("/tournaments?populate=*&sort=startDate:asc");
-  if (!remote?.length) return tournaments;
-  return remote.map((item) => ({ id: item.id, ...item.attributes, ...item }));
+  const remote = await fetchStrapi<any[]>("/public-tournaments?populate=*&sort=startDate:asc");
+  if (!remote?.length) return [];
+  return remote.map((item) => {
+    const flat = flatten(item);
+    const teams = flat.teams?.data ?? flat.teams ?? [];
+    const players = flat.players?.data ?? flat.players ?? [];
+    return {
+      id: flat.id,
+      name: flat.name,
+      slug: flat.slug,
+      sportType: flat.sportType ?? "football",
+      location: flat.location ?? "",
+      startDate: flat.startDate ?? "",
+      endDate: flat.endDate ?? "",
+      registrationFee: Number(flat.registrationFee ?? 0),
+      requiresPayment: Boolean(flat.requiresPayment ?? true),
+      auctionDate: flat.auctionDate ?? "",
+      rules: flat.rules ?? "",
+      status: flat.tournamentStatus ?? flat.status ?? "draft",
+      teamCount: Number(flat.teamCount ?? teams.length ?? 0),
+      playerCount: Number(flat.playerCount ?? players.length ?? 0),
+    };
+  });
 }
 
 export async function getTournamentBySlug(slug: string) {
@@ -56,8 +75,6 @@ export async function getTournamentBySlug(slug: string) {
 }
 
 export async function getTeams(slug?: string) {
-  const localTeams = slug ? teams.filter((team) => team.tournamentSlug === slug) : teams;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const remote =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (await fetchStrapi<any[]>(`/public-teams${slug ? `?tournamentSlug=${encodeURIComponent(slug)}` : ""}`)) ??
@@ -79,16 +96,9 @@ export async function getTeams(slug?: string) {
         tournamentSlug: tournament?.slug ?? "",
       };
     });
-    const scoped = slug ? all.filter((team) => team.tournamentSlug === slug) : all;
-    const merged = [...localTeams];
-    scoped.forEach((team) => {
-      if (!merged.some((item) => item.name.toLowerCase() === team.name.toLowerCase())) {
-        merged.push(team);
-      }
-    });
-    return merged;
+    return slug ? all.filter((team) => team.tournamentSlug === slug) : all;
   }
-  return localTeams;
+  return [];
 }
 
 export async function getTeam(teamId: string | number) {
@@ -131,7 +141,7 @@ export async function getPlayers(slug?: string) {
     });
     return slug ? all.filter((player) => player.tournamentSlug === slug) : all;
   }
-  return slug ? players.filter((player) => player.tournamentSlug === slug) : players;
+  return [];
 }
 
 export async function getTeamPlayers(slug?: string, teamId?: string | number): Promise<TeamPlayer[]> {
@@ -174,8 +184,8 @@ export async function getTeamPlayers(slug?: string, teamId?: string | number): P
     return all.filter((item) => (!slug || item.tournamentSlug === slug) && (!teamId || String(item.teamId) === String(teamId)));
   }
 
-  const fallbackPlayers = await getPlayers(slug);
-  return fallbackPlayers
+  const dynamicPlayers = await getPlayers(slug);
+  return dynamicPlayers
     .filter((player) => !teamId || String(player.teamId) === String(teamId))
     .map((player) => ({
       id: player.id,
@@ -188,7 +198,6 @@ export async function getTeamPlayers(slug?: string, teamId?: string | number): P
 }
 
 export async function getRegistrations(slug?: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const remote =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (await fetchStrapi<any[]>(`/public-registrations${slug ? `?tournamentSlug=${encodeURIComponent(slug)}` : ""}`)) ??
@@ -223,7 +232,7 @@ export async function getRegistrations(slug?: string) {
     });
     return slug ? all.filter((registration) => registration.tournamentSlug === slug) : all;
   }
-  return slug ? registrations.filter((registration) => registration.tournamentSlug === slug) : registrations;
+  return [];
 }
 
 export async function getTournamentRelationId(slug: string) {
@@ -232,10 +241,49 @@ export async function getTournamentRelationId(slug: string) {
 }
 
 export async function getAuctions(slug?: string) {
-  return slug ? auctions.filter((auction) => auction.tournamentSlug === slug) : auctions;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const remote = await fetchStrapi<any[]>("/auctions?populate=tournament,bids,bids.player,bids.team&sort=startsAt:desc&pagination[pageSize]=100");
+  if (!remote?.length) return [];
+
+  const all = remote.map((item): Auction => {
+    const flat = flatten(item);
+    const tournament = flattenRelation(flat.tournament);
+    const rawBids = flat.bids?.data ?? flat.bids ?? [];
+    const bids: Bid[] = Array.isArray(rawBids)
+      ? rawBids.map((bidItem) => {
+          const bid = flatten(bidItem);
+          return {
+            id: bid.id,
+            auctionId: relationId(flat) ?? flat.id,
+            playerId: relationId(flattenRelation(bid.player)) ?? 0,
+            teamId: relationId(flattenRelation(bid.team)) ?? 0,
+            amount: Number(bid.amount ?? 0),
+            isWinning: Boolean(bid.isWinning),
+          };
+        })
+      : [];
+
+    return {
+      id: flat.id,
+      title: flat.title ?? "",
+      tournamentSlug: tournament?.slug ?? "",
+      status: flat.status ?? "scheduled",
+      startsAt: flat.startsAt ?? "",
+      bids,
+    };
+  });
+
+  return slug ? all.filter((auction) => auction.tournamentSlug === slug) : all;
 }
 
 export async function getDashboardStats() {
+  const [tournaments, teams, registrations, players] = await Promise.all([
+    getTournaments(),
+    getTeams(),
+    getRegistrations(),
+    getPlayers(),
+  ]);
+
   return {
     tournaments: tournaments.length,
     teams: teams.length,

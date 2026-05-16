@@ -12,7 +12,13 @@ export default async function RegisterPage({ params }: { params: Promise<{ slug:
         <p className="text-sm font-bold uppercase text-emerald-700">{tournament.name}</p>
         <h1 className="font-heading text-4xl font-black">Player registration</h1>
       </div>
-      <RegistrationForm fee={tournament.registrationFee} tournamentId={tournament.id} tournamentSlug={slug} tournamentName={tournament.name} />
+      <RegistrationForm
+        fee={tournament.registrationFee}
+        registrationInstruction={tournament.registrationInstruction}
+        tournamentId={tournament.id}
+        tournamentSlug={slug}
+        tournamentName={tournament.name}
+      />
     </section>
   );
 }

@@ -204,11 +204,13 @@ function PlayerShareCard({ card }: { card: CardData }) {
 
 export function RegistrationForm({
   fee,
+  registrationInstruction,
   tournamentId,
   tournamentSlug,
   tournamentName,
 }: {
   fee: number;
+  registrationInstruction?: string;
   tournamentId: number;
   tournamentSlug: string;
   tournamentName: string;
@@ -311,6 +313,14 @@ export function RegistrationForm({
         <option value="bank">Bank</option>
         <option value="cash">Cash</option>
       </select>
+
+      {registrationInstruction ? (
+        <div className="rounded-md border border-emerald-100 bg-emerald-50 p-4 text-sm text-emerald-950 md:col-span-2">
+          <p className="font-heading text-lg font-black">Registration instruction</p>
+          <p className="mt-2 whitespace-pre-line leading-6">{registrationInstruction}</p>
+          <p className="mt-3 font-bold">Registration fee: Tk {fee.toLocaleString()}</p>
+        </div>
+      ) : null}
       <input className={inputClass} name="transactionId" placeholder={`Transaction ID, fee ৳${fee}`} />
 
       <label className="flex h-24 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed bg-slate-50 text-sm font-semibold text-slate-600 md:col-span-2">

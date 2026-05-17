@@ -1,14 +1,20 @@
 import { RegistrationStatusControls } from "@/components/sports/admin/registration-controls";
 import { getRegistrations } from "@/data/tournament/api";
+import { DownloadRegistrationsButton } from "@/components/sports/admin/download-registrations-button";
 
 export default async function RegistrationsPage() {
   const registrations = await getRegistrations();
   return (
     <div>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-        <h1 className="font-heading text-3xl font-black sm:text-4xl">Player registrations</h1>
-        <div className="inline-flex w-fit items-center rounded-md border bg-white px-3 py-2 text-sm font-bold text-slate-600 shadow-sm">
-          Total registrations: <span className="ml-2 text-slate-950">{registrations.length}</span>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-heading text-3xl font-black sm:text-4xl">Player registrations</h1>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex h-11 items-center rounded-md border bg-white px-4 text-sm font-bold text-slate-600 shadow-sm">
+            Total registrations: <span className="ml-2 text-slate-950">{registrations.length}</span>
+          </div>
+          <DownloadRegistrationsButton registrations={registrations} />
         </div>
       </div>
 

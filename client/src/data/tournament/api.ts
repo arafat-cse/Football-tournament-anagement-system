@@ -216,21 +216,30 @@ export async function getRegistrations(slug?: string) {
     const all = remote.map((item): Registration => {
       const flat = flatten(item);
       const tournament = flattenRelation(flat.tournament);
+      const player = flattenRelation(flat.player);
+      const teamPlayer = Array.isArray(player?.teamPlayers?.data)
+        ? flattenRelation(player.teamPlayers.data[0])
+        : Array.isArray(player?.teamPlayers)
+          ? player.teamPlayers[0]
+          : undefined;
+      const team = flattenRelation(teamPlayer?.team);
       return {
-        id: flat.id,
+        id: player?.id ?? flat.id,
         documentId: flat.documentId,
-        name: flat.name,
-        phone: flat.phone,
-        email: flat.email ?? "",
-        age: Number(flat.age ?? 0),
-        address: flat.address ?? "",
-        role: flat.role ?? "",
-        experience: flat.experience ?? "",
-        photoUrl: mediaUrl(flat.photo),
-        basePrice: Number(flat.basePrice ?? 0),
+        name: player?.name ?? flat.name,
+        phone: player?.phone ?? flat.phone,
+        email: player?.email ?? flat.email ?? "",
+        age: Number(player?.age ?? flat.age ?? 0),
+        address: player?.address ?? flat.address ?? "",
+        role: player?.role ?? flat.role ?? "",
+        experience: player?.experience ?? flat.experience ?? "",
+        photoUrl: mediaUrl(player?.photo ?? flat.photo),
+        basePrice: Number(player?.basePrice ?? flat.basePrice ?? 0),
+        finalPrice: teamPlayer?.price == null ? undefined : Number(teamPlayer.price),
+        teamId: relationId(team),
         registrationStatus: flat.registrationStatus ?? "pending",
         paymentStatus: flat.paymentStatus ?? "pending",
-        auctionStatus: "pool",
+        auctionStatus: player?.auctionStatus ?? "pool",
         tournamentSlug: tournament?.slug ?? "",
         paymentMethod: flat.paymentMethod ?? "bkash",
         transactionId: flat.transactionId ?? "",
@@ -266,6 +275,10 @@ export async function getAuctions(slug?: string) {
       player: player ? {
         id: player.id,
         name: player.name,
+        phone: player.phone ?? "",
+        email: player.email ?? "",
+        age: Number(player.age ?? 0),
+        address: player.address ?? "",
         photoUrl: mediaUrl(player.photo),
         basePrice: Number(player.basePrice ?? 0),
         role: player.role ?? "",

@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
-import { Check, CircleDollarSign, Loader2, ToggleLeft, ToggleRight } from "lucide-react";
+import { Check, CircleDollarSign, Edit3, Eye, Loader2, ToggleLeft, ToggleRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { StatusBadge } from "@/components/sports/status-badge";
 import type { PaymentStatus, RegistrationStatus } from "@/data/tournament/types";
@@ -11,11 +12,15 @@ export function RegistrationStatusControls({
   paymentId,
   paymentStatus,
   registrationStatus,
+  editHref,
+  viewHref,
 }: {
   approveId: string | number;
   paymentId: string | number;
   paymentStatus: PaymentStatus;
   registrationStatus: RegistrationStatus;
+  editHref?: string;
+  viewHref?: string;
 }) {
   const router = useRouter();
   const [message, setMessage] = useState("");
@@ -58,14 +63,34 @@ export function RegistrationStatusControls({
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge value={registrationStatus} />
         <button
-          className="inline-flex h-8 items-center gap-1 rounded-md border px-2 text-xs font-bold hover:bg-slate-50 disabled:opacity-50"
+          className="inline-flex size-8 items-center justify-center rounded-md border text-xs font-bold hover:bg-slate-50 disabled:opacity-50"
           disabled={isPending || isApproved || !isPaid}
           title={isPaid ? "Approve registration" : "Mark payment paid before approval"}
+          aria-label="Approve registration"
           onClick={() => run(() => fetch(`/api/admin/registrations/${approveId}/approve`, { method: "POST" }))}
         >
           {isPending ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4 text-emerald-600" />}
-          Approve
         </button>
+        {editHref ? (
+          <Link
+            href={editHref}
+            className="inline-flex size-8 items-center justify-center rounded-md border text-slate-600 hover:bg-slate-50"
+            title="Edit registration"
+            aria-label="Edit registration"
+          >
+            <Edit3 className="size-4" />
+          </Link>
+        ) : null}
+        {viewHref ? (
+          <Link
+            href={viewHref}
+            className="inline-flex size-8 items-center justify-center rounded-md border text-slate-600 hover:bg-slate-50"
+            title="View registration"
+            aria-label="View registration"
+          >
+            <Eye className="size-4" />
+          </Link>
+        ) : null}
       </div>
 
       {message ? <p className="text-xs font-semibold text-red-600">{message}</p> : null}

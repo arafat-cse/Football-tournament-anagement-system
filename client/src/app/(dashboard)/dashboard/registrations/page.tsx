@@ -30,6 +30,8 @@ export default async function RegistrationsPage() {
                 paymentId={item.documentId ?? item.id}
                 paymentStatus={item.paymentStatus}
                 registrationStatus={item.registrationStatus}
+                editHref={`/dashboard/registrations/${item.documentId ?? item.id}/edit`}
+                viewHref={item.tournamentSlug ? `/tournaments/${item.tournamentSlug}/players/${item.id}` : undefined}
               />
             </div>
             <dl className="mt-4 grid gap-2 text-sm">
@@ -63,6 +65,8 @@ export default async function RegistrationsPage() {
                     paymentId={item.documentId ?? item.id}
                     paymentStatus={item.paymentStatus}
                     registrationStatus={item.registrationStatus}
+                    editHref={`/dashboard/registrations/${item.documentId ?? item.id}/edit`}
+                    viewHref={item.tournamentSlug ? `/tournaments/${item.tournamentSlug}/players/${item.id}` : undefined}
                   />
                 </td>
               </tr>

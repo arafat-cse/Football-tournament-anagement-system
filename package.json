@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "cd server && npm run start",
+    "startf": "cd server && npm run start",
     "client": "yarn dev --prefix ../client/",
     "server": "yarn dev --prefix ../server/",
     "setup:client": "cd client && yarn && node --loader ts-node/esm ../copy-env.mts ./",

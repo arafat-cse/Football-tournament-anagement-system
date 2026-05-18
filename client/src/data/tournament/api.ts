@@ -1,12 +1,13 @@
-import { getStrapiMedia, getStrapiURL } from "@/lib/utils";
+import { getStrapiMedia, getStrapiURL, getResolvedStrapiURL } from "@/lib/utils";
 import type { Auction, Player, Registration, Sponsor, Team, TeamPlayer, Tournament } from "./types";
 
-const apiUrl = (process.env.NEXT_PUBLIC_STRAPI_API_URL || process.env.STRAPI_BASE_URL || getStrapiURL()).replace("localhost", "127.0.0.1");
+const apiUrl = getResolvedStrapiURL();
 const token = process.env.STRAPI_API_TOKEN;
 
 async function fetchStrapi<T>(path: string): Promise<T | null> {
   try {
-    const response = await fetch(`${apiUrl}/api${path}`, {
+    const cleanPath = path.startsWith("/") ? path : `/${path}`;
+    const response = await fetch(`${apiUrl}/api${cleanPath}`, {
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
@@ -111,7 +112,9 @@ export async function getTeam(teamId: string | number, slug?: string) {
 
 export async function getPlayers(slug?: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const remote = await fetchStrapi<any[]>("/public-players?sort=createdAt:desc&pagination[pageSize]=100");
+  const remote = await fetchStrapi<any[]>(
+    `/public-players?sort=createdAt:desc&pagination[pageSize]=100${slug ? `&tournamentSlug=${encodeURIComponent(slug)}` : ""}`
+  );
   if (remote?.length) {
     const all = remote.map((item): Player => {
       const flat = flatten(item);

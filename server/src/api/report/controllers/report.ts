@@ -52,10 +52,14 @@ export default {
   async playersPdf(ctx: any) {
     const { tournament, status, team } = ctx.query;
     const filters: any = {};
-    if (tournament) filters.tournament = tournament;
+    if (tournament) {
+      filters.tournament = {
+        documentId: tournament
+      };
+    }
     if (status) filters.registrationStatus = status;
 
-    const players = await strapi.entityService.findMany('api::player.player', {
+    const players = await strapi.documents('api::player.player').findMany({
       filters,
       populate: ['tournament', 'teamPlayers.team'],
       sort: ['name:asc'],
@@ -63,7 +67,7 @@ export default {
     });
 
     const rows = players
-      .filter((player: any) => !team || player.teamPlayers?.some((item: any) => String(item.team?.id) === String(team)))
+      .filter((player: any) => !team || player.teamPlayers?.some((item: any) => String(item.team?.documentId || item.team?.id) === String(team)))
       .map((player: any) => [player.name, player.role || '-', player.phone || '-', player.registrationStatus, player.paymentStatus, player.auctionStatus]);
     sendPdf(ctx, 'Tournament Player List', [['Name', 'Role', 'Phone', 'Registration', 'Payment', 'Auction'], ...rows]);
   },
@@ -71,10 +75,18 @@ export default {
   async teamSquadPdf(ctx: any) {
     const { tournament, team } = ctx.query;
     const filters: any = {};
-    if (tournament) filters.tournament = tournament;
-    if (team) filters.team = team;
+    if (tournament) {
+      filters.tournament = {
+        documentId: tournament
+      };
+    }
+    if (team) {
+      filters.team = {
+        documentId: team
+      };
+    }
 
-    const squad = await strapi.entityService.findMany('api::team-player.team-player', {
+    const squad = await strapi.documents('api::team-player.team-player').findMany({
       filters,
       populate: ['team', 'player', 'tournament'],
       sort: ['team.name:asc'],
@@ -90,11 +102,15 @@ export default {
   async registrationsExcel(ctx: any) {
     const { tournament, status, paymentStatus } = ctx.query;
     const filters: any = {};
-    if (tournament) filters.tournament = tournament;
+    if (tournament) {
+      filters.tournament = {
+        documentId: tournament
+      };
+    }
     if (status) filters.registrationStatus = status;
     if (paymentStatus) filters.paymentStatus = paymentStatus;
 
-    const registrations = await strapi.entityService.findMany('api::registration.registration', {
+    const registrations = await strapi.documents('api::registration.registration').findMany({
       filters,
       populate: ['tournament'],
       sort: ['createdAt:desc'],
@@ -117,11 +133,15 @@ export default {
   async paymentsExcel(ctx: any) {
     const { tournament, status, from, to } = ctx.query;
     const filters: any = {};
-    if (tournament) filters.tournament = tournament;
+    if (tournament) {
+      filters.tournament = {
+        documentId: tournament
+      };
+    }
     if (status) filters.status = status;
     if (from || to) filters.createdAt = { ...(from ? { $gte: from } : {}), ...(to ? { $lte: to } : {}) };
 
-    const payments = await strapi.entityService.findMany('api::payment.payment', {
+    const payments = await strapi.documents('api::payment.payment').findMany({
       filters,
       populate: ['tournament', 'registration'],
       sort: ['createdAt:desc'],

@@ -8,8 +8,9 @@ const relationId = (value: unknown) => {
 };
 
 const logAction = async (strapi: any, action: string, entity: string, entityId: string | number, details?: unknown) => {
-  await strapi.entityService.create('api::action-log.action-log', {
+  await strapi.documents('api::action-log.action-log').create({
     data: { action, entity, entityId: String(entityId), actorRole: 'admin', details },
+    status: 'published',
   });
 };
 
@@ -42,7 +43,7 @@ export default factories.createCoreController('api::registration.registration', 
     const filters: any = {};
 
     if (tournamentSlug) {
-      const tournaments = await strapi.entityService.findMany('api::tournament.tournament', {
+      const tournaments = await strapi.documents('api::tournament.tournament').findMany({
         filters: { slug: tournamentSlug },
         limit: 1,
       });
@@ -50,10 +51,12 @@ export default factories.createCoreController('api::registration.registration', 
         ctx.body = { data: [] };
         return;
       }
-      filters.tournament = tournaments[0].id;
+      filters.tournament = {
+        documentId: tournaments[0].documentId
+      };
     }
 
-    const registrations = await strapi.entityService.findMany('api::registration.registration', {
+    const registrations = await strapi.documents('api::registration.registration').findMany({
       filters,
       populate: ['tournament', 'player', 'player.photo', 'player.teamPlayers', 'player.teamPlayers.team', 'photo'],
       sort: ['createdAt:desc'],
@@ -73,7 +76,7 @@ export default factories.createCoreController('api::registration.registration', 
       return ctx.badRequest('name, phone and tournament are required');
     }
 
-    const registration = await strapi.entityService.create('api::registration.registration', {
+    const registration = await strapi.documents('api::registration.registration').create({
       data: {
         name: data.name,
         phone: data.phone,
@@ -93,21 +96,23 @@ export default factories.createCoreController('api::registration.registration', 
         paymentScreenshot: data.paymentScreenshot || screenshotId,
       },
       populate: ['tournament', 'payment'],
+      status: 'published',
     });
 
-    await strapi.entityService.create('api::payment.payment', {
+    await strapi.documents('api::payment.payment').create({
       data: {
         method: data.paymentMethod || 'bkash',
         transactionId: data.transactionId,
         amount: data.amount || 0,
         status: 'pending',
         tournament: data.tournament,
-        registration: registration.id,
+        registration: registration.documentId || registration.id,
         screenshot: screenshotId,
       },
+      status: 'published',
     });
 
-    await logAction(strapi, 'registration.public_created', 'registration', registration.id, {
+    await logAction(strapi, 'registration.public_created', 'registration', registration.documentId || registration.id, {
       name: data.name,
       phone: data.phone,
     });
@@ -117,7 +122,8 @@ export default factories.createCoreController('api::registration.registration', 
 
   async approve(ctx) {
     const id = ctx.params.id;
-    const registration = await strapi.entityService.findOne('api::registration.registration', id, {
+    const registration = await strapi.documents('api::registration.registration').findOne({
+      documentId: id,
       populate: ['tournament', 'player', 'photo'],
     });
 
@@ -129,7 +135,7 @@ export default factories.createCoreController('api::registration.registration', 
 
     let player = registration.player as any;
     if (!player) {
-      player = await strapi.entityService.create('api::player.player', {
+      player = await strapi.documents('api::player.player').create({
         data: {
           name: registration.name,
           phone: registration.phone,
@@ -142,25 +148,26 @@ export default factories.createCoreController('api::registration.registration', 
           registrationStatus: 'approved',
           paymentStatus: registration.paymentStatus,
           auctionStatus: 'pool',
-          tournament: relationId(tournament),
-          registration: id,
-          photo: relationId(registration.photo),
+          tournament: tournament ? (tournament.documentId || tournament.id) : null,
+          registration: registration.documentId || registration.id,
+          photo: registration.photo ? (registration.photo.documentId || registration.photo.id) : null,
         },
-        populate: ['tournament', 'registration', 'photo'],
+        status: 'published',
       });
     } else {
-      player = await strapi.entityService.update('api::player.player', relationId(player), {
+      player = await strapi.documents('api::player.player').update({
+        documentId: player.documentId || player.id,
         data: { registrationStatus: 'approved', paymentStatus: registration.paymentStatus, auctionStatus: 'pool' },
-        populate: ['tournament', 'registration', 'photo'],
       });
     }
 
-    const updated = await strapi.entityService.update('api::registration.registration', id, {
-      data: { registrationStatus: 'approved', rejectionReason: null, player: relationId(player) },
+    const updated = await strapi.documents('api::registration.registration').update({
+      documentId: id,
+      data: { registrationStatus: 'approved', rejectionReason: null, player: player.documentId || player.id },
       populate: ['tournament', 'player', 'payment'],
     });
 
-    await logAction(strapi, 'registration.approved', 'registration', id, { playerId: player.id || player.documentId });
+    await logAction(strapi, 'registration.approved', 'registration', id, { playerId: player.documentId || player.id });
     ctx.body = { data: updated };
   },
 
@@ -169,13 +176,16 @@ export default factories.createCoreController('api::registration.registration', 
     const reason = ctx.request.body?.reason || ctx.request.body?.data?.rejectionReason;
     if (!reason) return ctx.badRequest('Rejected players must have a rejection reason');
 
-    const updated = await strapi.entityService.update('api::registration.registration', id, {
+    const updated = await strapi.documents('api::registration.registration').update({
+      documentId: id,
       data: { registrationStatus: 'rejected', rejectionReason: reason },
       populate: ['tournament', 'player', 'payment'],
     });
+    
     const playerId = relationId((updated as any).player);
     if (playerId) {
-      await strapi.entityService.update('api::player.player', playerId, {
+      await strapi.documents('api::player.player').update({
+        documentId: playerId,
         data: { registrationStatus: 'rejected' },
       });
     }

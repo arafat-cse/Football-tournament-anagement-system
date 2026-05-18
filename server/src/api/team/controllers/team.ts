@@ -35,7 +35,7 @@ export default factories.createCoreController('api::team.team', ({ strapi }) => 
     };
 
     if (tournamentSlug) {
-      const tournaments = await strapi.entityService.findMany('api::tournament.tournament', {
+      const tournaments = await strapi.documents('api::tournament.tournament').findMany({
         filters: { slug: tournamentSlug },
         limit: 1,
       });
@@ -43,10 +43,12 @@ export default factories.createCoreController('api::team.team', ({ strapi }) => 
         ctx.body = { data: [] };
         return;
       }
-      filters.tournament = tournaments[0].id;
+      filters.tournament = {
+        documentId: tournaments[0].documentId
+      };
     }
 
-    const teams = await strapi.entityService.findMany('api::team.team', {
+    const teams = await strapi.documents('api::team.team').findMany({
       filters,
       populate: ['tournament', 'logo'],
       sort: ['name:asc'],
@@ -64,7 +66,7 @@ export default factories.createCoreController('api::team.team', ({ strapi }) => 
       return ctx.badRequest('name and tournament are required');
     }
 
-    const team = await strapi.entityService.create('api::team.team', {
+    const team = await strapi.documents('api::team.team').create({
       data: {
         name: data.name,
         ownerName: data.ownerName,
@@ -77,6 +79,7 @@ export default factories.createCoreController('api::team.team', ({ strapi }) => 
         logo: data.logo || logoId,
       },
       populate: ['tournament', 'logo'],
+      status: 'published',
     });
 
     ctx.body = { data: team };
@@ -84,7 +87,8 @@ export default factories.createCoreController('api::team.team', ({ strapi }) => 
 
   async approve(ctx) {
     const id = ctx.params.id;
-    const team = await strapi.entityService.update('api::team.team', id, {
+    const team = await strapi.documents('api::team.team').update({
+      documentId: id,
       data: { registrationStatus: 'approved' },
       populate: ['tournament', 'logo'],
     });
@@ -94,7 +98,8 @@ export default factories.createCoreController('api::team.team', ({ strapi }) => 
 
   async reject(ctx) {
     const id = ctx.params.id;
-    const team = await strapi.entityService.update('api::team.team', id, {
+    const team = await strapi.documents('api::team.team').update({
+      documentId: id,
       data: { registrationStatus: 'rejected' },
       populate: ['tournament', 'logo'],
     });

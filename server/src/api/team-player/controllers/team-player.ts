@@ -1,7 +1,11 @@
 // @ts-nocheck
 import { factories } from '@strapi/strapi';
 
-const idOf = (value: any) => (typeof value === 'object' && value ? value.id : value);
+const idOf = (value: any) => {
+  if (!value) return undefined;
+  if (typeof value === 'object') return value.documentId || value.id;
+  return value;
+};
 const money = (value: unknown) => Number(value || 0);
 
 export default factories.createCoreController('api::team-player.team-player', ({ strapi }) => ({
@@ -10,7 +14,7 @@ export default factories.createCoreController('api::team-player.team-player', ({
     const filters: any = {};
 
     if (tournamentSlug) {
-      const tournaments = await strapi.entityService.findMany('api::tournament.tournament', {
+      const tournaments = await strapi.documents('api::tournament.tournament').findMany({
         filters: { slug: tournamentSlug },
         limit: 1,
       });
@@ -18,12 +22,18 @@ export default factories.createCoreController('api::team-player.team-player', ({
         ctx.body = { data: [] };
         return;
       }
-      filters.tournament = tournaments[0].id;
+      filters.tournament = {
+        documentId: tournaments[0].documentId
+      };
     }
 
-    if (team) filters.team = team;
+    if (team) {
+      filters.team = {
+        documentId: team
+      };
+    }
 
-    const squad = await strapi.entityService.findMany('api::team-player.team-player', {
+    const squad = await strapi.documents('api::team-player.team-player').findMany({
       filters,
       populate: ['team', 'player', 'player.photo', 'tournament'],
       sort: ['assignedAt:desc'],
@@ -43,13 +53,18 @@ export default factories.createCoreController('api::team-player.team-player', ({
     }
 
     const [tournament, team, player] = await Promise.all([
-      strapi.entityService.findOne('api::tournament.tournament', tournamentId),
-      strapi.entityService.findOne('api::team.team', teamId, { populate: ['tournament'] }),
-      strapi.entityService.findOne('api::player.player', playerId, { populate: ['tournament'] }),
+      strapi.documents('api::tournament.tournament').findOne({ documentId: tournamentId }),
+      strapi.documents('api::team.team').findOne({ documentId: teamId, populate: ['tournament'] }),
+      strapi.documents('api::player.player').findOne({ documentId: playerId, populate: ['tournament'] }),
     ]);
 
     if (!tournament || !team || !player) return ctx.notFound('Tournament, team or player not found');
-    if (idOf(team.tournament) !== Number(tournamentId) || idOf(player.tournament) !== Number(tournamentId)) {
+    
+    const tId = idOf(tournament);
+    const teamTId = idOf(team.tournament);
+    const playerTId = idOf(player.tournament);
+    
+    if (teamTId !== tId || playerTId !== tId) {
       return ctx.badRequest('Team and player must belong to the selected tournament');
     }
     if (team.registrationStatus && team.registrationStatus !== 'approved') {
@@ -59,8 +74,11 @@ export default factories.createCoreController('api::team-player.team-player', ({
       return ctx.badRequest('Only approved players can be assigned');
     }
 
-    const existing = await strapi.entityService.findMany('api::team-player.team-player', {
-      filters: { tournament: tournamentId, player: playerId },
+    const existing = await strapi.documents('api::team-player.team-player').findMany({
+      filters: { 
+        tournament: tId, 
+        player: idOf(player) 
+      },
       limit: 1,
     });
     if (existing.length) return ctx.badRequest('Player is already assigned in this tournament');
@@ -69,22 +87,25 @@ export default factories.createCoreController('api::team-player.team-player', ({
     const remainingBudget = money(team.budget) - money(team.spent);
     if (resolvedPrice > remainingBudget) return ctx.badRequest('Team cannot buy player beyond remaining budget');
 
-    const teamPlayer = await strapi.entityService.create('api::team-player.team-player', {
+    const teamPlayer = await strapi.documents('api::team-player.team-player').create({
       data: {
-        tournament: tournamentId,
-        team: teamId,
-        player: playerId,
+        tournament: tId,
+        team: idOf(team),
+        player: idOf(player),
         price: resolvedPrice,
         source: 'manual_override',
         assignedAt: new Date().toISOString(),
       },
       populate: ['team', 'player', 'tournament'],
+      status: 'published',
     });
 
-    await strapi.entityService.update('api::team.team', teamId, {
+    await strapi.documents('api::team.team').update({
+      documentId: idOf(team),
       data: { spent: money(team.spent) + resolvedPrice },
     });
-    await strapi.entityService.update('api::player.player', playerId, {
+    await strapi.documents('api::player.player').update({
+      documentId: idOf(player),
       data: { auctionStatus: 'sold' },
     });
 

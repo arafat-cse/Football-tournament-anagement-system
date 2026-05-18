@@ -1,12 +1,12 @@
 import { redirect, notFound } from "next/navigation";
 import { getStrapiAuthHeaders } from "@/data/services/strapi-auth-headers";
 import { getRegistrations } from "@/data/tournament/api";
-import { getStrapiURL } from "@/lib/utils";
+import { getStrapiURL, getResolvedStrapiURL } from "@/lib/utils";
 
 const inputClass = "h-11 rounded-md border bg-white px-3 text-sm outline-none ring-emerald-600/20 focus:ring-4";
 const textareaClass = "min-h-28 rounded-md border bg-white px-3 py-2 text-sm outline-none ring-emerald-600/20 focus:ring-4 md:col-span-2";
 const roles = ["Forward", "Midfielder", "Defender", "Goalkeeper"];
-const strapiUrl = (process.env.STRAPI_BASE_URL || process.env.NEXT_PUBLIC_STRAPI_BASE_URL || getStrapiURL()).replace("localhost", "127.0.0.1");
+const strapiUrl = getResolvedStrapiURL();
 
 export default async function EditRegistrationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

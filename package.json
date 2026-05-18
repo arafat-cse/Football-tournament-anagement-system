@@ -3,14 +3,16 @@
   "version": "1.0.0",
   "description": "Strapi starter project with Next.js",
   "type": "module",
-  "scripts": {
+ "scripts": {
     "client": "yarn dev --prefix ../client/",
     "server": "yarn dev --prefix ../server/",
     "setup:client": "cd client && yarn && node --loader ts-node/esm ../copy-env.mts ./",
     "setup:server": "cd server && yarn && node --loader ts-node/esm ../copy-env.mts ./",
-    "setup": "yarn install && yarn setup:client && yarn setup:server",
+    "setupfrontend": "yarn install && yarn setup:client",
+    "setupcms": "yarn install && yarn setup:server",
     "dev": "yarn concurrently \"cd server && yarn develop\" \"npx wait-on http://localhost:1337 && cd client && yarn dev\"",
-    "export": "cd server && yarn strapi export --no-encrypt -f ../strapi-export",
+    "seed": "cd server && yarn strapi import -f ../seed-data.tar.gz --force",
+    "export": "cd server && yarn strapi export --no-encrypt -f ../seed-data",
     "repo:upstream": "git fetch upstream && git merge upstream/main"
   },
   "dependencies": {

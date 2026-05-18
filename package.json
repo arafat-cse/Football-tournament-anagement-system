@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Strapi starter project with Next.js",
   "type": "module",
- "scripts": {
+  "scripts": {
+    "start": "cd server && npm run start",
     "client": "yarn dev --prefix ../client/",
     "server": "yarn dev --prefix ../server/",
     "setup:client": "cd client && yarn && node --loader ts-node/esm ../copy-env.mts ./",

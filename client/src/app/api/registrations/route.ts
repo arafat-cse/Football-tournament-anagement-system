@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { getStrapiURL } from "@/lib/utils";
+import { getResolvedStrapiURL } from "@/lib/utils";
 
-const strapiUrl = (process.env.STRAPI_BASE_URL || process.env.NEXT_PUBLIC_STRAPI_BASE_URL || getStrapiURL()).replace("localhost", "127.0.0.1");
+const strapiUrl = getResolvedStrapiURL();
 const token = process.env.STRAPI_API_TOKEN;
 
 const headers = () => ({

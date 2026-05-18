@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAuthToken } from "@/data/services/get-auth-token";
-import { getStrapiURL } from "@/lib/utils";
+import { getStrapiURL, getResolvedStrapiURL } from "@/lib/utils";
 
-const strapiUrl = (process.env.STRAPI_BASE_URL || process.env.NEXT_PUBLIC_STRAPI_BASE_URL || getStrapiURL()).replace("localhost", "127.0.0.1");
+const strapiUrl = getResolvedStrapiURL();
 
 export async function POST(request: Request) {
   const { tournamentId, playerId, title } = await request.json().catch(() => ({}));

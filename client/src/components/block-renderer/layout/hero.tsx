@@ -14,14 +14,25 @@ export function Hero(data: Readonly<HeroProps>) {
       <div className="flex flex-1 flex-col items-center gap-8 md:items-start md:gap-10">
         {topLink && (
           <div className="flex cursor-pointer items-center gap-1 rounded-full border bg-secondary px-3 py-0.5 hover:bg-secondary/60">
-            <Link
-              href={topLink.href}
-              target={topLink.isExternal ? "_blank" : "_self"}
-              className="flex items-center justify-center gap-1 text-sm text-secondary-foreground"
-            >
-              {topLink.text}
-              <ArrowRight size={16} />
-            </Link>
+            {topLink.isExternal || topLink.href.startsWith("http") || topLink.href.startsWith("/api/") ? (
+              <a
+                href={topLink.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-1 text-sm text-secondary-foreground"
+              >
+                {topLink.text}
+                <ArrowRight size={16} />
+              </a>
+            ) : (
+              <Link
+                href={topLink.href}
+                className="flex items-center justify-center gap-1 text-sm text-secondary-foreground"
+              >
+                {topLink.text}
+                <ArrowRight size={16} />
+              </Link>
+            )}
           </div>
         )}
         <h1 className="max-w-2xl text-center font-heading text-4xl font-semibold sm:text-5xl sm:leading-tight md:text-left">
@@ -38,9 +49,15 @@ export function Hero(data: Readonly<HeroProps>) {
                 asChild
                 className="h-12 cursor-pointer border-border text-base sm:h-14 sm:px-10"
               >
-                <Link href={link.href} target={link.isExternal ? "_blank" : "_self"}>
-                  {link.text}
-                </Link>
+                {link.isExternal || link.href.startsWith("http") || link.href.startsWith("/api/") ? (
+                  <a href={link.href} target="_blank" rel="noopener noreferrer">
+                    {link.text}
+                  </a>
+                ) : (
+                  <Link href={link.href}>
+                    {link.text}
+                  </Link>
+                )}
               </Button>
             ))}
         </div>

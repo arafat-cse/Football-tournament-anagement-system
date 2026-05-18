@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Sponsor } from "@/data/tournament/types";
 
 export function SponsorSection({ sponsors }: { sponsors: Sponsor[] }) {
@@ -50,9 +49,9 @@ function SponsorLogo({ sponsor, isTitle }: { sponsor: Sponsor; isTitle?: boolean
   if (sponsor.website) {
     const url = sponsor.website.startsWith("http") ? sponsor.website : `https://${sponsor.website}`;
     return (
-      <Link href={url} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
+      <a href={url} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
         {content}
-      </Link>
+      </a>
     );
   }
 

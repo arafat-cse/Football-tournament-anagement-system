@@ -22,9 +22,9 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
             </span>
             <h1 className="font-heading text-4xl font-black">{team.name}</h1>
           </div>
-          <Link className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-bold text-white" href={`/api/exports/team-squad?tournamentSlug=${slug}&team=${team.id}`}>
+          <a className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-bold text-white" href={`/api/exports/team-squad?tournamentSlug=${slug}&team=${team.id}`}>
             <FileDown className="size-4" /> Download team PDF
-          </Link>
+          </a>
         </div>
         <p className="mt-2 text-slate-600">Owner: {team.ownerName} - {team.ownerPhone}</p>
         <div className="mt-5 grid gap-3 text-sm md:grid-cols-3">

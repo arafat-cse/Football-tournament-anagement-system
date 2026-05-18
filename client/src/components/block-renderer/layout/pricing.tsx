@@ -33,7 +33,11 @@ export function Pricing(data: Readonly<PriceGridProps>) {
                   ))}
                 </ul>
                 <Button size="lg" asChild className="mt-10 w-full">
-                  <Link href={link.href}>{link.text}</Link>
+                  {link.isExternal || link.href.startsWith("http") || link.href.startsWith("/api/") ? (
+                    <a href={link.href} target="_blank" rel="noopener noreferrer">{link.text}</a>
+                  ) : (
+                    <Link href={link.href}>{link.text}</Link>
+                  )}
                 </Button>
               </CardContent>
               {selected ? (

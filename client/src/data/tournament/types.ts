@@ -26,6 +26,7 @@ export type Tournament = {
 export type Team = {
   id: number;
   name: string;
+  logoUrl?: string;
   ownerName: string;
   ownerPhone: string;
   budget: number;

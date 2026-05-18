@@ -28,7 +28,12 @@ export function TeamCard({ team, slug }: { team: Team; slug: string }) {
   return (
     <Link href={`/tournaments/${slug}/teams/${team.id}`} className="block rounded-lg border bg-white p-5 shadow-sm">
       <div className="flex items-center gap-3">
-        <span className="size-10 rounded-md border" style={{ backgroundColor: team.jerseyColor }} />
+        <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-md border bg-slate-50" style={{ backgroundColor: team.logoUrl ? undefined : team.jerseyColor }}>
+          {team.logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={team.logoUrl} alt={`${team.name} logo`} className="h-full w-full object-cover" />
+          ) : null}
+        </span>
         <div>
           <h3 className="font-heading text-lg font-black">{team.name}</h3>
           <p className="text-sm text-slate-500">{team.ownerName}</p>

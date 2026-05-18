@@ -1,5 +1,5 @@
 import { getStrapiMedia, getStrapiURL } from "@/lib/utils";
-import type { Auction, Bid, Player, Registration, Sponsor, Team, TeamPlayer, Tournament } from "./types";
+import type { Auction, Player, Registration, Sponsor, Team, TeamPlayer, Tournament } from "./types";
 
 const apiUrl = (process.env.NEXT_PUBLIC_STRAPI_API_URL || process.env.STRAPI_BASE_URL || getStrapiURL()).replace("localhost", "127.0.0.1");
 const token = process.env.STRAPI_API_TOKEN;
@@ -89,6 +89,7 @@ export async function getTeams(slug?: string) {
       return {
         id: flat.id,
         name: flat.name,
+        logoUrl: mediaUrl(flat.logo),
         ownerName: flat.ownerName ?? "",
         ownerPhone: flat.ownerPhone ?? "",
         budget: Number(flat.budget ?? 0),
@@ -147,7 +148,6 @@ export async function getPlayers(slug?: string) {
 }
 
 export async function getTeamPlayers(slug?: string, teamId?: string | number): Promise<TeamPlayer[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const remote =
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (await fetchStrapi<any[]>(`/public-team-players${slug || teamId ? `?${new URLSearchParams({

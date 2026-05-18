@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, UserCheck, ShieldAlert, Award, FileSpreadsheet, Eye } from "lucide-react";
-import type { Player } from "@/data/tournament/types";
+import { Search, Award } from "lucide-react";
+import type { Player, Tournament } from "@/data/tournament/types";
 import { StatusBadge } from "@/components/sports/status-badge";
-import Link from "next/link";
+import { PlayerCardDialog, type CardData } from "@/components/sports/player-card";
 
-export function PlayersDashboardClient({ initialPlayers }: { initialPlayers: Player[] }) {
+export function PlayersDashboardClient({ initialPlayers, tournaments }: { initialPlayers: Player[]; tournaments: Tournament[] }) {
   const [search, setSearch] = useState("");
   const [selectedRole, setSelectedRole] = useState("All");
+  const [selectedCard, setSelectedCard] = useState<CardData | null>(null);
 
   const roles = ["All", "Forward", "Midfielder", "Defender", "Goalkeeper"];
 
@@ -22,6 +23,21 @@ export function PlayersDashboardClient({ initialPlayers }: { initialPlayers: Pla
 
     return matchesSearch && matchesRole;
   });
+
+  function openPlayerCard(player: Player) {
+    const tournamentName =
+      tournaments.find((tournament) => tournament.slug === player.tournamentSlug)?.name ||
+      player.tournamentSlug?.replace(/-/g, " ") ||
+      "Mirzapur Premier League";
+
+    setSelectedCard({
+      name: player.name,
+      role: player.role,
+      age: String(player.age || ""),
+      tournamentName,
+      photoUrl: player.photoUrl || "",
+    });
+  }
 
   return (
     <div className="space-y-6">
@@ -84,12 +100,13 @@ export function PlayersDashboardClient({ initialPlayers }: { initialPlayers: Pla
 
             <div className="mt-4 flex items-center justify-between border-t pt-3">
               <StatusBadge value={player.registrationStatus} />
-              <Link 
-                href="/dashboard/photo-card"
+              <button
+                type="button"
+                onClick={() => openPlayerCard(player)}
                 className="inline-flex h-8 items-center gap-1 rounded-md bg-emerald-50 px-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition"
               >
                 <Award className="size-3.5" /> Card
-              </Link>
+              </button>
             </div>
           </div>
         ))}
@@ -153,13 +170,14 @@ export function PlayersDashboardClient({ initialPlayers }: { initialPlayers: Pla
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Link
-                        href="/dashboard/photo-card"
+                      <button
+                        type="button"
+                        onClick={() => openPlayerCard(player)}
                         className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition-colors"
                         title="Generate Player Card"
                       >
                         <Award className="size-3.5" /> Card
-                      </Link>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -175,6 +193,7 @@ export function PlayersDashboardClient({ initialPlayers }: { initialPlayers: Pla
           </table>
         </div>
       </div>
+      <PlayerCardDialog isOpen={Boolean(selectedCard)} onClose={() => setSelectedCard(null)} card={selectedCard} />
     </div>
   );
 }

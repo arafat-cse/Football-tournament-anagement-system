@@ -72,102 +72,110 @@ export async function createCardBlob(card: CardData, imageElement?: HTMLImageEle
   const canvas = document.createElement("canvas");
   canvas.width = 1080;
   canvas.height = 1350;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Canvas not supported");
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Canvas not supported");
+  const ctx = context;
 
-  ctx.fillStyle = "#071c18";
+  function fillRoundRect(x: number, y: number, width: number, height: number, radius: number, color: string) {
+    ctx.beginPath();
+    ctx.fillStyle = color;
+    ctx.roundRect(x, y, width, height, radius);
+    ctx.fill();
+  }
+
+  function strokeRoundRect(x: number, y: number, width: number, height: number, radius: number, color: string, lineWidth: number) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.roundRect(x, y, width, height, radius);
+    ctx.stroke();
+  }
+
+  function drawCenteredText(value: string, x: number, y: number, font: string, color: string, maxWidth?: number) {
+    ctx.fillStyle = color;
+    ctx.font = font;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    ctx.fillText(value, x, y, maxWidth);
+  }
+
+  ctx.fillStyle = "#f1f5f9";
   ctx.fillRect(0, 0, 1080, 1350);
 
-  const glow = ctx.createRadialGradient(840, 180, 40, 840, 180, 720);
-  glow.addColorStop(0, "rgba(34,197,94,0.7)");
-  glow.addColorStop(1, "rgba(34,197,94,0)");
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, 1080, 1350);
+  fillRoundRect(78, 64, 924, 1222, 34, "#ffffff");
+  strokeRoundRect(78, 64, 924, 1222, 34, "#b7e4cf", 4);
+  fillRoundRect(78, 64, 924, 178, 34, "#043b2f");
+  ctx.fillStyle = "#043b2f";
+  ctx.fillRect(78, 170, 924, 72);
 
-  ctx.fillStyle = "#f8fafc";
-  ctx.roundRect(86, 86, 908, 1178, 42);
-  ctx.fill();
-  ctx.strokeStyle = "#bbf7d0";
-  ctx.lineWidth = 5;
-  ctx.stroke();
+  drawCenteredText(card.tournamentName || "Mirzapur Premier League", 540, 136, "900 48px Arial", "#ecfdf5", 820);
+  drawCenteredText("OFFICIAL PLAYER CARD", 540, 188, "900 24px Arial", "#a7f3d0", 760);
 
-  ctx.fillStyle = "#052e2b";
-  ctx.roundRect(126, 126, 828, 132, 30);
-  ctx.fill();
-  ctx.fillStyle = "#dcfce7";
-  ctx.font = "900 48px Arial";
-  ctx.textAlign = "left";
-  ctx.fillText("PLAYER REGISTRATION", 166, 204);
+  const x = 150;
+  const y = 294;
+  const width = 780;
+  const height = 690;
 
-  ctx.fillStyle = "#86efac";
-  ctx.font = "700 26px Arial";
-  ctx.fillText(card.tournamentName, 166, 240, 760);
+  fillRoundRect(x, y, width, height, 28, "#ffffff");
+  strokeRoundRect(x, y, width, height, 28, "#a7f3d0", 3);
 
-  const x = 250;
-  const y = 318;
-  const size = 580;
   const photoUrlToLoad = card.photoUrl || DEFAULT_PHOTO;
   if (photoUrlToLoad || imageElement) {
     try {
-      let image: HTMLImageElement;
+      let image: HTMLImageElement | null = null;
       if (photoUrlToLoad) {
-        image = await loadImage(photoUrlToLoad);
-      } else if (imageElement && imageElement.complete && imageElement.naturalWidth > 0) {
+        image = await loadImage(photoUrlToLoad).catch(() => null);
+      }
+      if (!image && imageElement?.complete && imageElement.naturalWidth > 0) {
         image = imageElement;
-      } else {
+      }
+      if (!image) {
+        image = await loadImage(DEFAULT_PHOTO);
+      }
+      if (!image) {
         throw new Error("Photo is not ready");
       }
 
       if ("decode" in image) await image.decode().catch(() => undefined);
-      const imageRatio = image.naturalWidth / image.naturalHeight;
-      const frameRatio = 1;
-      const sourceWidth = imageRatio > frameRatio ? image.naturalHeight * frameRatio : image.naturalWidth;
-      const sourceHeight = imageRatio > frameRatio ? image.naturalHeight : image.naturalWidth / frameRatio;
-      const sourceX = (image.naturalWidth - sourceWidth) / 2;
-      const sourceY = (image.naturalHeight - sourceHeight) / 2;
+      const imageWidth = image.naturalWidth || image.width;
+      const imageHeight = image.naturalHeight || image.height;
+      const scale = Math.min((width - 48) / imageWidth, (height - 48) / imageHeight);
+      const drawWidth = imageWidth * scale;
+      const drawHeight = imageHeight * scale;
+      const drawX = x + (width - drawWidth) / 2;
+      const drawY = y + (height - drawHeight) / 2;
 
       ctx.save();
       ctx.beginPath();
-      ctx.roundRect(x, y, size, size, 38);
+      ctx.roundRect(x, y, width, height, 28);
       ctx.clip();
-      ctx.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, x, y, size, size);
+      ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
       ctx.restore();
-      ctx.strokeStyle = "#16a34a";
-      ctx.lineWidth = 8;
-      ctx.roundRect(x, y, size, size, 38);
-      ctx.stroke();
     } catch (err) {
       console.error("Canvas draw error:", err);
-      ctx.fillStyle = "#ecfdf5";
-      ctx.roundRect(x, y, size, size, 38);
-      ctx.fill();
+      fillRoundRect(x, y, width, height, 28, "#d1fae5");
+      drawCenteredText((card.name || "P").slice(0, 1).toUpperCase(), 540, 670, "900 150px Arial", "#047857");
     }
   } else {
-    ctx.fillStyle = "#ecfdf5";
-    ctx.roundRect(x, y, size, size, 38);
-    ctx.fill();
+    fillRoundRect(x, y, width, height, 28, "#d1fae5");
+    drawCenteredText((card.name || "P").slice(0, 1).toUpperCase(), 540, 670, "900 150px Arial", "#047857");
   }
 
-  // Improved text readability for dark background
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "900 74px Arial";
+  drawCenteredText(card.name, 540, 1080, "900 54px Arial", "#020617", 820);
+  drawCenteredText(`Position: ${card.role || "-"}`, 540, 1142, "900 30px Arial", "#047857", 520);
+  drawCenteredText(`Age: ${card.age || "-"}`, 540, 1205, "800 26px Arial", "#334155");
+
+  fillRoundRect(150, 1242, 780, 58, 18, "#e7f8ef");
+  drawCenteredText("PLAYER PROFILE CARD", 540, 1279, "900 28px Arial", "#065f46", 700);
+
+  ctx.save();
+  ctx.translate(970, 1098);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = "#0f766e";
+  ctx.font = "800 22px Arial";
   ctx.textAlign = "center";
-  ctx.fillText(card.name, 540, 990, 830);
-
-  ctx.fillStyle = "#bbf7d0";
-  ctx.font = "900 44px Arial";
-  ctx.fillText(card.role, 540, 1056, 820);
-
-  ctx.fillStyle = "#f1f5f9";
-  ctx.font = "700 32px Arial";
-  ctx.fillText(`Age: ${card.age || "-"}`, 540, 1112);
-
-  ctx.fillStyle = "#dcfce7";
-  ctx.roundRect(146, 1160, 788, 92, 24);
-  ctx.fill();
-  ctx.fillStyle = "#064e3b";
-  ctx.font = "900 32px Arial";
-  ctx.fillText("OFFICIAL REGISTRATION CARD", 540, 1218, 740);
+  ctx.fillText("Create by mandsitbd.com", 0, 0, 360);
+  ctx.restore();
 
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -220,22 +228,26 @@ export function PlayerCardPreview({ card, title = "Registration submitted", subt
   }
 
   return (
-    <div className="grid gap-5 md:grid-cols-[380px_1fr]">
+    <div className="grid gap-5 md:grid-cols-[400px_1fr]">
       <div className="overflow-hidden rounded-lg border border-emerald-100 bg-white shadow-sm">
-        <div className="bg-emerald-950 p-4 text-white">
-          <p className="text-[10px] font-black uppercase tracking-widest text-lime-200">Official Player Card</p>
-          <h2 className="mt-1 font-heading text-lg font-black truncate">{card.name}</h2>
+        <div className="bg-emerald-950 p-4 text-center text-white">
+          <h2 className="font-heading text-lg font-black">{card.tournamentName || "Mirzapur Premier League"}</h2>
+          <p className="mt-1 text-[10px] font-black uppercase tracking-widest text-lime-200">Official Player Card</p>
         </div>
         <div className="p-4">
-          <div className="aspect-[4/5] overflow-hidden rounded-lg bg-emerald-50 ring-1 ring-emerald-100">
+          <div className="aspect-[1.03/1] overflow-hidden rounded-lg bg-emerald-50 ring-1 ring-emerald-100">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img ref={imgRef} src={previewPhotoUrl} alt={card.name} className="h-full w-full object-cover" />
           </div>
 
+          <div className="mt-4 text-center">
+            <h3 className="font-heading text-2xl font-black text-slate-950">{card.name}</h3>
+            <p className="mx-auto mt-2 inline-flex rounded-md bg-emerald-100 px-4 py-2 text-sm font-extrabold text-emerald-800">Position: {card.role || "-"}</p>
+          </div>
+
           <div className="mt-3 grid gap-1.5 text-[13px]">
-            <div className="flex justify-between rounded-md bg-slate-50 px-3 py-2"><span>Role</span><b>{card.role}</b></div>
             <div className="flex justify-between rounded-md bg-slate-50 px-3 py-2"><span>Age</span><b>{card.age || "-"}</b></div>
-            <div className="rounded-md bg-emerald-50 py-2 text-center font-bold text-emerald-800 truncate px-2">{card.tournamentName}</div>
+            <div className="rounded-md bg-emerald-50 py-2 text-center font-bold text-emerald-800 truncate px-2">Create by mandsitbd.com</div>
           </div>
         </div>
       </div>

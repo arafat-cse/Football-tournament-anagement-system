@@ -1,11 +1,8 @@
-import { getPlayers } from "@/data/tournament/api";
-import { Users, Search, CircleUser } from "lucide-react";
-import Link from "next/link";
-import { StatusBadge } from "@/components/sports/status-badge";
+import { getPlayers, getTournaments } from "@/data/tournament/api";
 import { PlayersDashboardClient } from "@/components/sports/admin/players-dashboard-client";
 
 export default async function PlayersListPage() {
-  const players = await getPlayers();
+  const [players, tournaments] = await Promise.all([getPlayers(), getTournaments()]);
 
   return (
     <div>
@@ -19,7 +16,7 @@ export default async function PlayersListPage() {
         </div>
       </div>
 
-      <PlayersDashboardClient initialPlayers={players} />
+      <PlayersDashboardClient initialPlayers={players} tournaments={tournaments} />
     </div>
   );
 }

@@ -142,11 +142,11 @@ export function RegistrationForm({
       ) : null}
       <input className={inputClass} name="transactionId" placeholder={`Transaction ID, fee ৳${fee}`} />
 
-      <label className="flex h-24 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed bg-slate-50 text-sm font-semibold text-slate-600 md:col-span-2">
+      {/* <label className="flex h-24 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed bg-slate-50 text-sm font-semibold text-slate-600 md:col-span-2">
         <Upload className="size-4" />
         Upload payment screenshot
         <input className="hidden" name="paymentScreenshot" type="file" accept="image/*" />
-      </label>
+      </label> */}
 
       {error ? <p className="rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700 md:col-span-2">{error}</p> : null}
 

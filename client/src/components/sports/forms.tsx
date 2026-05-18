@@ -17,12 +17,14 @@ export function RegistrationForm({
   fee,
   registrationInstruction,
   tournamentId,
+  tournamentDocId,
   tournamentSlug,
   tournamentName,
 }: {
   fee: number;
   registrationInstruction?: string;
   tournamentId: number;
+  tournamentDocId?: string;
   tournamentSlug: string;
   tournamentName: string;
 }) {
@@ -47,6 +49,9 @@ export function RegistrationForm({
     const form = event.currentTarget;
     const formData = new FormData(form);
     formData.set("tournament", String(tournamentId));
+    if (tournamentDocId) {
+      formData.set("tournamentDocId", tournamentDocId);
+    }
     formData.set("tournamentSlug", tournamentSlug);
     formData.set("amount", String(fee));
 

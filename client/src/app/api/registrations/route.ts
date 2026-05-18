@@ -30,6 +30,43 @@ async function uploadFile(file: File | null) {
   return uploaded?.[0]?.id;
 }
 
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const tournamentSlug = searchParams.get("tournamentSlug");
+
+    let url = `${strapiUrl}/api/registrations?populate=tournament,player,player.photo,player.teamPlayers,player.teamPlayers.team,photo&sort=createdAt:desc&pagination[pageSize]=1000`;
+    
+    if (tournamentSlug) {
+      // Find tournament first to get its documentId
+      const tRes = await fetch(`${strapiUrl}/api/public-tournaments?filters[slug][$eq]=${encodeURIComponent(tournamentSlug)}`, {
+        headers: headers(),
+      });
+      const tPayload = await tRes.json();
+      const tournamentDocId = tPayload?.data?.[0]?.documentId;
+      if (tournamentDocId) {
+        url += `&filters[tournament][documentId][$eq]=${tournamentDocId}`;
+      } else {
+        return NextResponse.json({ data: [] });
+      }
+    }
+
+    const response = await fetch(url, {
+      headers: headers(),
+      next: { revalidate: 0 } // Avoid caching
+    });
+
+    if (!response.ok) {
+      return NextResponse.json({ error: "Failed to fetch registrations from Strapi" }, { status: response.status });
+    }
+
+    const payload = await response.json();
+    return NextResponse.json({ data: payload?.data || [] });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Fetch registrations failed" }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -37,6 +74,11 @@ export async function POST(request: Request) {
     const screenshot = formData.get("paymentScreenshot") as File | null;
     const photoId = await uploadFile(photo);
     const screenshotId = await uploadFile(screenshot);
+
+    const tournamentVal = formData.get("tournamentDocId") || formData.get("tournament");
+    const parsedTournament = typeof tournamentVal === "string" && isNaN(Number(tournamentVal))
+      ? tournamentVal
+      : Number(tournamentVal);
 
     const data: Record<string, unknown> = {
       name: formData.get("name"),
@@ -52,7 +94,7 @@ export async function POST(request: Request) {
       amount: Number(formData.get("amount") || 0),
       paymentStatus: "pending",
       registrationStatus: "pending",
-      tournament: Number(formData.get("tournament")),
+      tournament: parsedTournament,
       ...(photoId ? { photo: photoId } : {}),
       ...(screenshotId ? { paymentScreenshot: screenshotId } : {}),
     };

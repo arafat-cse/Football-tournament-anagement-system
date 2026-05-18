@@ -53,6 +53,7 @@ export async function getTournaments(): Promise<Tournament[]> {
     const players = flat.players?.data ?? flat.players ?? [];
     return {
       id: flat.id,
+      documentId: flat.documentId,
       name: flat.name,
       slug: flat.slug,
       sportType: flat.sportType ?? "football",
@@ -210,11 +211,33 @@ export async function getTeamPlayers(slug?: string, teamId?: string | number): P
 }
 
 export async function getRegistrations(slug?: string) {
-  const remote =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (await fetchStrapi<any[]>(`/public-registrations${slug ? `?tournamentSlug=${encodeURIComponent(slug)}` : ""}`)) ??
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (await fetchStrapi<any[]>("/registrations?populate=tournament&sort=createdAt:desc&pagination[pageSize]=100"));
+  let remote: any[] | null = null;
+  const isServer = typeof window === "undefined";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://127.0.0.1:3000";
+  const fetchUrl = isServer
+    ? `${appUrl}/api/registrations${slug ? `?tournamentSlug=${encodeURIComponent(slug)}` : ""}`
+    : `/api/registrations${slug ? `?tournamentSlug=${encodeURIComponent(slug)}` : ""}`;
+
+  try {
+    const response = await fetch(fetchUrl, {
+      cache: "no-store",
+    });
+    if (response.ok) {
+      const payload = await response.json();
+      remote = payload.data || [];
+    }
+  } catch (err) {
+    console.warn("Failed to fetch registrations from Next.js route, falling back to direct Strapi fetch:", err);
+  }
+
+  if (remote == null) {
+    remote =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (await fetchStrapi<any[]>(`/public-registrations${slug ? `?tournamentSlug=${encodeURIComponent(slug)}` : ""}`)) ??
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (await fetchStrapi<any[]>("/registrations?populate=tournament&sort=createdAt:desc&pagination[pageSize]=100"));
+  }
+
   if (remote?.length) {
     const all = remote.map((item): Registration => {
       const flat = flatten(item);

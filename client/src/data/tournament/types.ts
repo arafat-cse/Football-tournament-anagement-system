@@ -6,6 +6,7 @@ export type AuctionStatus = "pool" | "sold" | "unsold";
 
 export type Tournament = {
   id: number;
+  documentId?: string;
   name: string;
   slug: string;
   sportType: SportType;

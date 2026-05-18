@@ -17,6 +17,7 @@ export default async function RegisterPage({ params }: { params: Promise<{ slug:
           fee={tournament.registrationFee}
           registrationInstruction={tournament.registrationInstruction}
           tournamentId={tournament.id}
+          tournamentDocId={tournament.documentId}
           tournamentSlug={slug}
           tournamentName={tournament.name}
         />

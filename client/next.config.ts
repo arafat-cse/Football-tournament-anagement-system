@@ -23,9 +23,19 @@ const nextConfig: NextConfig = {
         port: '3040',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'adminball.bmhbd.org',
+        pathname: '/uploads/**',
+      },
       // Live Strapi server hostname (from STRAPI_BASE_URL env)
       ...(strapiHost ? [{
         protocol: 'https' as const,
+        hostname: strapiHost,
+        pathname: '/uploads/**',
+      }] : []),
+      ...(strapiHost ? [{
+        protocol: 'http' as const,
         hostname: strapiHost,
         pathname: '/uploads/**',
       }] : []),

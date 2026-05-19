@@ -41,15 +41,27 @@ export function getPublicStrapiURL() {
 }
 
 export function getStrapiAuthURL() {
-  const raw =
-    process.env.STRAPI_AUTH_URL ||
-    process.env.NEXT_PUBLIC_STRAPI_BASE_URL ||
-    process.env.NEXT_PUBLIC_STRAPI_API_URL ||
-    process.env.STRAPI_BASE_URL ||
-    process.env.STRAPI_INTERNAL_URL ||
-    "https://adminball.bmhbd.org/";
+  return getStrapiAuthURLs()[0];
+}
 
-  return raw.endsWith("/") ? raw.slice(0, -1) : raw;
+export function getStrapiAuthURLs() {
+  const urls = [
+    process.env.STRAPI_AUTH_URL ||
+      process.env.NEXT_PUBLIC_STRAPI_BASE_URL ||
+      process.env.NEXT_PUBLIC_STRAPI_API_URL ||
+      process.env.STRAPI_BASE_URL ||
+      process.env.STRAPI_INTERNAL_URL ||
+      "https://adminball.bmhbd.org/",
+    process.env.NEXT_PUBLIC_STRAPI_BASE_URL,
+    process.env.NEXT_PUBLIC_STRAPI_API_URL,
+    process.env.STRAPI_BASE_URL,
+    process.env.STRAPI_INTERNAL_URL,
+    "https://adminball.bmhbd.org/",
+  ]
+    .filter((url): url is string => Boolean(url))
+    .map((url) => (url.endsWith("/") ? url.slice(0, -1) : url));
+
+  return [...new Set(urls)];
 }
 
 export function getStrapiMedia(url: string | null) {

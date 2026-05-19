@@ -12,6 +12,13 @@ const config = {
   secure: process.env.NODE_ENV === "production",
 };
 
+type AuthActionState = {
+  zodErrors?: Record<string, string[] | undefined> | null;
+  strapiErrors?: unknown;
+  data?: unknown;
+  message?: string | null;
+};
+
 const schemaRegister = z.object({
   username: z.string().min(3).max(20, {
     message: "Username must be between 3 and 20 characters",
@@ -24,7 +31,7 @@ const schemaRegister = z.object({
   }),
 });
 
-export async function registerUserAction(prevState: any, formData: FormData) {
+export async function registerUserAction(prevState: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const validatedFields = schemaRegister.safeParse({
     username: formData.get("username"),
     password: formData.get("password"),
@@ -71,7 +78,7 @@ const schemaLogin = z.object({
     .min(3, {
       message: "Identifier must have at least 3 or more characters",
     })
-    .max(20, {
+    .max(100, {
       message: "Please enter a valid username or email address",
     }),
   password: z
@@ -84,7 +91,7 @@ const schemaLogin = z.object({
     }),
 });
 
-export async function loginUserAction(prevState: any, formData: FormData) {
+export async function loginUserAction(prevState: AuthActionState, formData: FormData): Promise<AuthActionState> {
   const validatedFields = schemaLogin.safeParse({
     identifier: formData.get("identifier"),
     password: formData.get("password"),

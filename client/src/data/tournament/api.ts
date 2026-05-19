@@ -212,22 +212,20 @@ export async function getTeamPlayers(slug?: string, teamId?: string | number): P
 
 export async function getRegistrations(slug?: string) {
   let remote: any[] | null = null;
-  const isServer = typeof window === "undefined";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://127.0.0.1:3000";
-  const fetchUrl = isServer
-    ? `${appUrl}/api/registrations${slug ? `?tournamentSlug=${encodeURIComponent(slug)}` : ""}`
-    : `/api/registrations${slug ? `?tournamentSlug=${encodeURIComponent(slug)}` : ""}`;
+  const isClient = typeof window !== "undefined";
 
-  try {
-    const response = await fetch(fetchUrl, {
-      cache: "no-store",
-    });
-    if (response.ok) {
-      const payload = await response.json();
-      remote = payload.data || [];
+  if (isClient) {
+    try {
+      const response = await fetch(`/api/registrations${slug ? `?tournamentSlug=${encodeURIComponent(slug)}` : ""}`, {
+        cache: "no-store",
+      });
+      if (response.ok) {
+        const payload = await response.json();
+        remote = payload.data || [];
+      }
+    } catch (err) {
+      console.warn("Client failed to fetch registrations from Next.js route, falling back to direct Strapi fetch:", err);
     }
-  } catch (err) {
-    console.warn("Failed to fetch registrations from Next.js route, falling back to direct Strapi fetch:", err);
   }
 
   if (remote == null) {

@@ -41,7 +41,7 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ slu
         </div>
         <span className="rounded-md bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700">{squad.length} players</span>
       </div>
-      <div className="mt-4 overflow-hidden rounded-lg border">
+      <div className="mt-4 overflow-x-auto rounded-lg border">
         <table className="w-full min-w-[900px] text-left text-sm">
           <thead className="bg-slate-100 text-xs uppercase text-slate-500">
             <tr><th className="px-4 py-3">Photo</th><th className="px-4 py-3">Name</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Phone</th><th className="px-4 py-3">Price</th><th className="px-4 py-3">Assigned by</th><th className="px-4 py-3">Assigned at</th></tr>

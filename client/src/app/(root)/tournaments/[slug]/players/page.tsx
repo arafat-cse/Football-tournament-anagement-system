@@ -18,7 +18,7 @@ export default async function PlayersPage({ params }: { params: Promise<{ slug: 
           <FileSpreadsheet className="size-4" /> Download Excel
         </a>
       </div>
-      <div className="mt-6 overflow-hidden rounded-lg border">
+      <div className="mt-6 overflow-x-auto rounded-lg border">
         <table className="w-full min-w-[900px] text-left text-sm">
           <thead className="bg-slate-100 text-xs uppercase text-slate-500">
             <tr><th className="px-4 py-3">Name</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Base</th><th className="px-4 py-3">Registration</th><th className="px-4 py-3">Payment</th><th className="px-4 py-3">Auction</th><th className="px-4 py-3">Team</th><th className="px-4 py-3">Action</th></tr>

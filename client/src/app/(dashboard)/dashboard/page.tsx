@@ -22,7 +22,7 @@ export default async function DashboardRoute() {
           <h2 className="font-heading text-xl font-black">Pending registrations</h2>
           <Gavel className="size-5 text-emerald-600" />
         </div>
-        <div className="overflow-hidden rounded-md border">
+        <div className="overflow-x-auto rounded-md border">
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="px-4 py-3">Player</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Payment</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Action</th></tr></thead>
             <tbody>

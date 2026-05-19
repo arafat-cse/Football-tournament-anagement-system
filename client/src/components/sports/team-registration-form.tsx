@@ -53,7 +53,7 @@ export function TeamRegistrationForm({ tournamentId }: { tournamentId: number })
 
     form.reset();
     setLogoPreview("");
-    setSuccess("Team registration submitted. Admin approval-er por team list-e show korbe.");
+    setSuccess("Team registration submitted. Admin approval will team list-e show.");
     setOpen(false);
     router.refresh();
   }

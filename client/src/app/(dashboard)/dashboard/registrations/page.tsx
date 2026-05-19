@@ -32,7 +32,7 @@ export default async function RegistrationsPage() {
                 <p className="mt-1 text-sm font-semibold text-slate-500">{item.role || "No role"}</p>
               </div>
               <RegistrationStatusControls
-                approveId={item.id}
+                approveId={item.documentId ?? item.id}
                 paymentId={item.documentId ?? item.id}
                 paymentStatus={item.paymentStatus}
                 registrationStatus={item.registrationStatus}
@@ -67,7 +67,7 @@ export default async function RegistrationsPage() {
                 <td className="px-4 py-3">{item.transactionId}</td>
                 <td className="px-4 py-3">
                   <RegistrationStatusControls
-                    approveId={item.id}
+                    approveId={item.documentId ?? item.id}
                     paymentId={item.documentId ?? item.id}
                     paymentStatus={item.paymentStatus}
                     registrationStatus={item.registrationStatus}

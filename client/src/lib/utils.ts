@@ -6,6 +6,16 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getResolvedStrapiURL() {
+  const isServer = typeof window === "undefined";
+  
+  if (isServer && process.env.STRAPI_INTERNAL_URL) {
+    let url = process.env.STRAPI_INTERNAL_URL;
+    if (url.endsWith("/")) {
+      url = url.slice(0, -1);
+    }
+    return url;
+  }
+
   const raw = process.env.STRAPI_BASE_URL || process.env.NEXT_PUBLIC_STRAPI_BASE_URL || process.env.NEXT_PUBLIC_STRAPI_API_URL || "http://localhost:1337";
   let url = raw.replace("localhost", "127.0.0.1");
   if (url.endsWith("/")) {

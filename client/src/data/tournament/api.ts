@@ -4,17 +4,34 @@ import type { Auction, Player, Registration, Sponsor, Team, TeamPlayer, Tourname
 const apiUrl = getResolvedStrapiURL();
 const token = process.env.STRAPI_API_TOKEN;
 
+// Check if we're in static generation/build phase
+const isBuilding = process.env.NEXT_PHASE === "phase-production-build";
+const isStaticExport = process.env.NEXT_EXPORT === "true";
+
 async function fetchStrapi<T>(path: string): Promise<T | null> {
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   
+  // During static generation/build, return null instead of trying to fetch
+  if (isBuilding || isStaticExport) {
+    console.log(`Skipping fetch during build for ${cleanPath}`);
+    return null;
+  }
+  
   // Try using the primary configured API URL
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+    
     const response = await fetch(`${apiUrl}/api${cleanPath}`, {
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       cache: "no-store",
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
+    
     if (response.ok) {
       const payload = await response.json();
       return payload.data as T;
@@ -22,19 +39,30 @@ async function fetchStrapi<T>(path: string): Promise<T | null> {
       console.warn(`fetchStrapi primary request returned non-OK status ${response.status} for ${cleanPath}`);
     }
   } catch (error) {
-    console.warn(`fetchStrapi primary request failed for ${cleanPath} using URL ${apiUrl}:`, error);
+    if (error instanceof Error && error.name === 'AbortError') {
+      console.warn(`fetchStrapi primary request timed out for ${cleanPath}`);
+    } else {
+      console.warn(`fetchStrapi primary request failed for ${cleanPath} using URL ${apiUrl}:`, error);
+    }
   }
 
-  // Fallback: If primary failed and apiUrl is external, try the loopback address http://127.0.0.1:3040
+  // Fallback: If primary failed and apiUrl is external, try the loopback address
   if (!apiUrl.includes("127.0.0.1") && !apiUrl.includes("localhost")) {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      
       console.log(`Attempting internal loopback fallback fetch for ${cleanPath}...`);
       const response = await fetch(`http://127.0.0.1:3040/api${cleanPath}`, {
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         cache: "no-store",
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
         const payload = await response.json();
         return payload.data as T;
@@ -256,7 +284,7 @@ export async function getRegistrations(slug?: string) {
     }
   }
 
-  if (remote == null) {
+  if (remote == null && !isBuilding && !isStaticExport) {
     remote =
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (await fetchStrapi<any[]>(`/public-registrations${slug ? `?tournamentSlug=${encodeURIComponent(slug)}` : ""}`)) ??
@@ -347,6 +375,19 @@ export async function getAuctions(slug?: string) {
 }
 
 export async function getDashboardStats() {
+  // During build, return empty stats
+  if (isBuilding || isStaticExport) {
+    return {
+      tournaments: 0,
+      teams: 0,
+      registrations: 0,
+      pendingRegistrations: 0,
+      paidRegistrations: 0,
+      soldPlayers: 0,
+      revenue: 0,
+    };
+  }
+  
   const [tournaments, teams, registrations, players] = await Promise.all([
     getTournaments(),
     getTeams(),

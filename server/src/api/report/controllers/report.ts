@@ -48,15 +48,30 @@ const sendWorkbook = (ctx: any, filename: string, sheetName: string, columns: { 
   ctx.body = excelXml(sheetName, columns, rows);
 };
 
+const tournamentFilter = async (ctx: any) => {
+  const tournament = ctx.query.tournament || ctx.query.tournamentSlug;
+  if (!tournament) return undefined;
+
+  const tournaments = await strapi.documents('api::tournament.tournament').findMany({
+    filters: {
+      $or: [
+        { documentId: tournament },
+        { slug: tournament },
+      ],
+    },
+    limit: 1,
+  });
+
+  const resolved = tournaments[0]?.documentId || tournament;
+  return { documentId: resolved };
+};
+
 export default {
   async playersPdf(ctx: any) {
-    const { tournament, status, team } = ctx.query;
+    const { status, team } = ctx.query;
     const filters: any = {};
-    if (tournament) {
-      filters.tournament = {
-        documentId: tournament
-      };
-    }
+    const tournament = await tournamentFilter(ctx);
+    if (tournament) filters.tournament = tournament;
     if (status) filters.registrationStatus = status;
 
     const players = await strapi.documents('api::player.player').findMany({
@@ -73,13 +88,10 @@ export default {
   },
 
   async teamSquadPdf(ctx: any) {
-    const { tournament, team } = ctx.query;
+    const { team } = ctx.query;
     const filters: any = {};
-    if (tournament) {
-      filters.tournament = {
-        documentId: tournament
-      };
-    }
+    const tournament = await tournamentFilter(ctx);
+    if (tournament) filters.tournament = tournament;
     if (team) {
       filters.team = {
         documentId: team
@@ -100,13 +112,10 @@ export default {
   },
 
   async registrationsExcel(ctx: any) {
-    const { tournament, status, paymentStatus } = ctx.query;
+    const { status, paymentStatus } = ctx.query;
     const filters: any = {};
-    if (tournament) {
-      filters.tournament = {
-        documentId: tournament
-      };
-    }
+    const tournament = await tournamentFilter(ctx);
+    if (tournament) filters.tournament = tournament;
     if (status) filters.registrationStatus = status;
     if (paymentStatus) filters.paymentStatus = paymentStatus;
 
@@ -131,13 +140,10 @@ export default {
   },
 
   async paymentsExcel(ctx: any) {
-    const { tournament, status, from, to } = ctx.query;
+    const { status, from, to } = ctx.query;
     const filters: any = {};
-    if (tournament) {
-      filters.tournament = {
-        documentId: tournament
-      };
-    }
+    const tournament = await tournamentFilter(ctx);
+    if (tournament) filters.tournament = tournament;
     if (status) filters.status = status;
     if (from || to) filters.createdAt = { ...(from ? { $gte: from } : {}), ...(to ? { $lte: to } : {}) };
 

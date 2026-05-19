@@ -28,11 +28,35 @@ export function getStrapiURL() {
   return getResolvedStrapiURL();
 }
 
+export function getPublicStrapiURL() {
+  const raw =
+    process.env.NEXT_PUBLIC_STRAPI_MEDIA_URL ||
+    process.env.NEXT_PUBLIC_STRAPI_BASE_URL ||
+    process.env.NEXT_PUBLIC_STRAPI_API_URL ||
+    process.env.STRAPI_BASE_URL ||
+    process.env.STRAPI_INTERNAL_URL ||
+    "https://adminball.bmhbd.org/";
+
+  return raw.endsWith("/") ? raw.slice(0, -1) : raw;
+}
+
 export function getStrapiMedia(url: string | null) {
   if (url == null) return null;
   if (url.startsWith("data:")) return url;
-  if (url.startsWith("http") || url.startsWith("//")) return url;
-  const baseUrl = getStrapiURL();
+  const publicBaseUrl = getPublicStrapiURL();
+  if (url.startsWith("//")) return `https:${url}`;
+  if (url.startsWith("http")) {
+    try {
+      const mediaUrl = new URL(url);
+      if (["127.0.0.1", "localhost", "0.0.0.0"].includes(mediaUrl.hostname)) {
+        return `${publicBaseUrl}${mediaUrl.pathname}${mediaUrl.search}`;
+      }
+    } catch {
+      return url;
+    }
+    return url;
+  }
+  const baseUrl = publicBaseUrl;
   return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`;
 }
 

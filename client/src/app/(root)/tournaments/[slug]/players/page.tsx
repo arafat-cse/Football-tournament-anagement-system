@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { FileSpreadsheet } from "lucide-react";
 import { PlayerRow } from "@/components/sports/cards";
 import { getRegistrations, getTeams } from "@/data/tournament/api";
 
 export default async function PlayersPage({ params }: { params: Promise<{ slug: string }> }) {
+  await connection();
   const { slug } = await params;
   const [registrations, teams] = await Promise.all([getRegistrations(slug), getTeams(slug)]);
   const teamName = (id?: number) => teams.find((team) => team.id === id)?.name;

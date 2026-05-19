@@ -1,7 +1,9 @@
+import { connection } from "next/server";
 import { TournamentCard } from "@/components/sports/cards";
 import { getTournaments } from "@/data/tournament/api";
 
 export default async function TournamentsPage() {
+  await connection();
   const tournaments = await getTournaments();
   return (
     <section className="container py-10">

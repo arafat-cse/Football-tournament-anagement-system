@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { CalendarDays, Gavel, MapPin, Users } from "lucide-react";
 import { TeamCard } from "@/components/sports/cards";
 import { StatusBadge } from "@/components/sports/status-badge";
@@ -8,6 +9,7 @@ import { formatDate } from "@/lib/utils";
 import { SponsorSection } from "@/components/sports/sponsor-section";
 
 export default async function TournamentPage({ params }: { params: Promise<{ slug: string }> }) {
+  await connection();
   const { slug } = await params;
   const tournament = await getTournamentBySlug(slug);
   if (!tournament) notFound();

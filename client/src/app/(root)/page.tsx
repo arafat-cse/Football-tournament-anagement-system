@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { ArrowRight, Gavel, ShieldCheck, Trophy } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { TournamentCard } from "@/components/sports/cards";
@@ -11,6 +12,7 @@ const features: { title: string; body: string; icon: LucideIcon }[] = [
 ];
 
 export default async function Home() {
+  await connection();
   const tournaments = await getTournaments();
   return (
     <div>

@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { ArrowLeft, Banknote, CalendarDays, Mail, MapPin, Phone, ShieldCheck, UserRound } from "lucide-react";
 import { StatusBadge } from "@/components/sports/status-badge";
 import { getRegistrations, getTeams } from "@/data/tournament/api";
 import { formatDate } from "@/lib/utils";
 
 export default async function PlayerDetailsPage({ params }: { params: Promise<{ slug: string; playerId: string }> }) {
+  await connection();
   const { slug, playerId } = await params;
   const [registrations, teams] = await Promise.all([getRegistrations(slug), getTeams(slug)]);
   const player = registrations.find((registration) => String(registration.id) === String(playerId));

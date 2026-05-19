@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { Gavel, Trophy, User } from "lucide-react";
 import { getAuctions, getTournamentBySlug } from "@/data/tournament/api";
 
 export default async function AuctionPage({ params }: { params: Promise<{ slug: string }> }) {
+  await connection();
   const { slug } = await params;
   const tournament = await getTournamentBySlug(slug);
   if (!tournament) notFound();

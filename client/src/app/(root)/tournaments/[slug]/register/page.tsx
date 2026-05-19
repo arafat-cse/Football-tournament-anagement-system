@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { RegistrationForm } from "@/components/sports/forms";
 import { getTournamentBySlug } from "@/data/tournament/api";
 
 export default async function RegisterPage({ params }: { params: Promise<{ slug: string }> }) {
+  await connection();
   const { slug } = await params;
   const tournament = await getTournamentBySlug(slug);
   if (!tournament) notFound();

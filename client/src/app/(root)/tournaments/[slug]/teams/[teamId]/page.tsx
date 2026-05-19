@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { FileDown } from "lucide-react";
 import { getTeam, getTeamPlayers } from "@/data/tournament/api";
 import { formatDate } from "@/lib/utils";
 
 export default async function TeamDetailPage({ params }: { params: Promise<{ slug: string; teamId: string }> }) {
+  await connection();
   const { slug, teamId } = await params;
   const [team, squad] = await Promise.all([getTeam(teamId, slug), getTeamPlayers(slug, teamId)]);
   if (!team) notFound();

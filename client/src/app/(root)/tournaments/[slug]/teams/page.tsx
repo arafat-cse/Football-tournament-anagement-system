@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { FileDown } from "lucide-react";
 import { TeamCard } from "@/components/sports/cards";
 import { TeamRegistrationForm } from "@/components/sports/team-registration-form";
@@ -6,6 +7,7 @@ import { getTeams, getTournamentBySlug } from "@/data/tournament/api";
 import { notFound } from "next/navigation";
 
 export default async function TeamsPage({ params }: { params: Promise<{ slug: string }> }) {
+  await connection();
   const { slug } = await params;
   const [tournament, teams] = await Promise.all([getTournamentBySlug(slug), getTeams(slug)]);
   if (!tournament) notFound();

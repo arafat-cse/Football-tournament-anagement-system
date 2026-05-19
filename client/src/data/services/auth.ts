@@ -1,4 +1,4 @@
-import { getStrapiURL } from "@/lib/utils";
+import { getStrapiAuthURL } from "@/lib/utils";
 
 interface RegisterUserProps {
   username: string;
@@ -11,7 +11,7 @@ interface LoginUserProps {
   password: string;
 }
 
-const baseUrl = getStrapiURL();
+const baseUrl = getStrapiAuthURL();
 
 export async function registerUserService(userData: RegisterUserProps) {
   const url = new URL("/api/auth/local/register", baseUrl);

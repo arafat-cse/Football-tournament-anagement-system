@@ -40,6 +40,18 @@ export function getPublicStrapiURL() {
   return raw.endsWith("/") ? raw.slice(0, -1) : raw;
 }
 
+export function getStrapiAuthURL() {
+  const raw =
+    process.env.STRAPI_AUTH_URL ||
+    process.env.NEXT_PUBLIC_STRAPI_BASE_URL ||
+    process.env.NEXT_PUBLIC_STRAPI_API_URL ||
+    process.env.STRAPI_BASE_URL ||
+    process.env.STRAPI_INTERNAL_URL ||
+    "https://adminball.bmhbd.org/";
+
+  return raw.endsWith("/") ? raw.slice(0, -1) : raw;
+}
+
 export function getStrapiMedia(url: string | null) {
   if (url == null) return null;
   if (url.startsWith("data:")) return url;

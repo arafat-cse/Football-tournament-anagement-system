@@ -26,6 +26,7 @@ export type Tournament = {
 
 export type Team = {
   id: number;
+  documentId?: string;
   name: string;
   logoUrl?: string;
   ownerName: string;
@@ -39,6 +40,7 @@ export type Team = {
 
 export type TeamPlayer = {
   id: number;
+  documentId?: string;
   teamId: number;
   tournamentSlug: string;
   player: Player;
@@ -49,6 +51,7 @@ export type TeamPlayer = {
 
 export type Player = {
   id: number;
+  documentId?: string;
   name: string;
   phone: string;
   email: string;

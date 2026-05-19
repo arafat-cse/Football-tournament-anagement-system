@@ -26,7 +26,7 @@ export async function GET(request: Request) {
 
     if (!response.ok) {
       // Fallback: fetch via standard registrations endpoint using token
-      let fallbackUrl = `${strapiUrl}/api/registrations?populate=tournament,player,player.photo,player.teamPlayers,player.teamPlayers.team,photo&sort=createdAt:desc&pagination[pageSize]=1000`;
+      let fallbackUrl = `${strapiUrl}/api/registrations?populate[0]=tournament&populate[1]=player&populate[2]=player.photo&populate[3]=player.teamPlayers&populate[4]=player.teamPlayers.team&populate[5]=photo&sort=createdAt:desc&pagination[pageSize]=1000`;
       
       if (tournamentSlug) {
         // Resolve tournament documentId first

@@ -32,6 +32,7 @@ export function AuctionControlPanel({
 
   const selectedTournament = tournaments.find((item) => String(item.id) === tournamentId);
   const selectedAuctionPlayer = players.find((item) => String(item.id) === auctionPlayerId);
+  const selectedTeam = teams.find((item) => String(item.id) === teamId);
   const selectedAssignPlayer = players.find((item) => String(item.id) === assignPlayerId);
 
   const auctionPlayers = useMemo(
@@ -122,9 +123,9 @@ export function AuctionControlPanel({
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        tournamentId: Number(tournamentId),
-        teamId: Number(teamId),
-        playerId: Number(assignPlayerId),
+        tournamentId: selectedTournament?.documentId ?? tournamentId,
+        teamId: selectedTeam?.documentId ?? teamId,
+        playerId: selectedAssignPlayer?.documentId ?? assignPlayerId,
         price: Number(price || selectedAssignPlayer?.basePrice || 0),
       }),
     }).catch(() => null);
@@ -200,9 +201,19 @@ export function AuctionControlPanel({
               className="rounded-md border bg-slate-50 p-4 text-left transition hover:border-amber-300 hover:bg-amber-50"
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate font-heading text-lg font-black">{player.name}</p>
-                  <p className="mt-1 text-sm font-semibold text-slate-500">{player.role || "Player"} - Tk {player.basePrice.toLocaleString()}</p>
+                <div className="flex min-w-0 items-center gap-3">
+                  {player.photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={player.photoUrl} alt={player.name} className="size-12 shrink-0 rounded-full object-cover ring-2 ring-amber-400/30" />
+                  ) : (
+                    <span className="grid size-12 shrink-0 place-items-center rounded-full bg-white text-xs font-black uppercase text-slate-500 ring-1 ring-slate-200">
+                      {player.name.slice(0, 2)}
+                    </span>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate font-heading text-lg font-black">{player.name}</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-500">{player.role || "Player"} - Tk {player.basePrice.toLocaleString()}</p>
+                  </div>
                 </div>
                 <StatusBadge value={player.auctionStatus} />
               </div>

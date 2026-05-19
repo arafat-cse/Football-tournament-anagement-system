@@ -64,8 +64,8 @@ export function RegistrationStatusControls({
         <StatusBadge value={registrationStatus} />
         <button
           className="inline-flex size-8 items-center justify-center rounded-md border text-xs font-bold hover:bg-slate-50 disabled:opacity-50"
-          disabled={isPending || isApproved || !isPaid}
-          title={isPaid ? "Approve registration" : "Mark payment paid before approval"}
+          disabled={isPending || isApproved}
+          title="Approve registration"
           aria-label="Approve registration"
           onClick={() => run(() => fetch(`/api/admin/registrations/${approveId}/approve`, { method: "POST" }))}
         >

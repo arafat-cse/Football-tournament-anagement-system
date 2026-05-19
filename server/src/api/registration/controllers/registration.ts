@@ -1,12 +1,6 @@
 // @ts-nocheck
 import { factories } from '@strapi/strapi';
 
-const relationId = (value: unknown) => {
-  if (typeof value === 'number' || typeof value === 'string') return value;
-  if (value && typeof value === 'object' && 'id' in value) return (value as { id: string | number }).id;
-  return undefined;
-};
-
 const logAction = async (strapi: any, action: string, entity: string, entityId: string | number, details?: unknown) => {
   await strapi.documents('api::action-log.action-log').create({
     data: { action, entity, entityId: String(entityId), actorRole: 'admin', details },
@@ -35,6 +29,24 @@ const uploadRequestFile = async (strapi: any, file: any) => {
     files: file,
   });
   return uploaded?.[0]?.id;
+};
+
+const playerDataFromRegistration = (registration: any, tournament: any, regDocId: string) => {
+  return {
+    name: registration.name,
+    phone: registration.phone,
+    email: registration.email,
+    age: registration.age,
+    address: registration.address,
+    role: registration.role,
+    experience: registration.experience,
+    basePrice: registration.basePrice,
+    registrationStatus: 'approved',
+    paymentStatus: registration.paymentStatus,
+    auctionStatus: 'pool',
+    tournament: tournament ? (tournament.documentId || tournament.id) : null,
+    registration: regDocId,
+  };
 };
 
 export default factories.createCoreController('api::registration.registration', ({ strapi }) => ({
@@ -122,36 +134,49 @@ export default factories.createCoreController('api::registration.registration', 
 
   async approve(ctx) {
     const id = ctx.params.id;
-    const registration = await strapi.documents('api::registration.registration').findOne({
-      documentId: id,
-      populate: ['tournament', 'player', 'photo'],
-    });
+    let regDocId = id;
+    let registration;
+
+    // Resolve registration and correct documentId (handles both numeric ID and documentId)
+    if (/^\d+$/.test(id)) {
+      const results = await strapi.documents('api::registration.registration').findMany({
+        filters: { id: Number(id) },
+        populate: ['tournament', 'player'],
+        limit: 1,
+      });
+      registration = results[0];
+      if (registration) {
+        regDocId = registration.documentId;
+      }
+    } else {
+      registration = await strapi.documents('api::registration.registration').findOne({
+        documentId: id,
+        populate: ['tournament', 'player'],
+      });
+      if (registration) {
+        regDocId = registration.documentId;
+      }
+    }
 
     if (!registration) return ctx.notFound('Registration not found');
     const tournament = registration.tournament as any;
-    if (tournament?.requiresPayment && registration.paymentStatus !== 'paid') {
-      return ctx.badRequest('Only paid players can be approved for this tournament');
+
+    if (registration.paymentStatus !== 'paid') {
+      const updated = await strapi.documents('api::registration.registration').update({
+        documentId: regDocId,
+        data: { registrationStatus: 'approved', rejectionReason: null },
+        populate: ['tournament', 'player', 'payment'],
+      });
+
+      await logAction(strapi, 'registration.approved', 'registration', regDocId, { playerId: null });
+      ctx.body = { data: updated };
+      return;
     }
 
     let player = registration.player as any;
     if (!player) {
       player = await strapi.documents('api::player.player').create({
-        data: {
-          name: registration.name,
-          phone: registration.phone,
-          email: registration.email,
-          age: registration.age,
-          address: registration.address,
-          role: registration.role,
-          experience: registration.experience,
-          basePrice: registration.basePrice,
-          registrationStatus: 'approved',
-          paymentStatus: registration.paymentStatus,
-          auctionStatus: 'pool',
-          tournament: tournament ? (tournament.documentId || tournament.id) : null,
-          registration: registration.documentId || registration.id,
-          photo: registration.photo ? (registration.photo.documentId || registration.photo.id) : null,
-        },
+        data: playerDataFromRegistration(registration, tournament, regDocId),
         status: 'published',
       });
     } else {
@@ -162,12 +187,12 @@ export default factories.createCoreController('api::registration.registration', 
     }
 
     const updated = await strapi.documents('api::registration.registration').update({
-      documentId: id,
+      documentId: regDocId,
       data: { registrationStatus: 'approved', rejectionReason: null, player: player.documentId || player.id },
       populate: ['tournament', 'player', 'payment'],
     });
 
-    await logAction(strapi, 'registration.approved', 'registration', id, { playerId: player.documentId || player.id });
+    await logAction(strapi, 'registration.approved', 'registration', regDocId, { playerId: player.documentId || player.id });
     ctx.body = { data: updated };
   },
 
@@ -176,13 +201,25 @@ export default factories.createCoreController('api::registration.registration', 
     const reason = ctx.request.body?.reason || ctx.request.body?.data?.rejectionReason;
     if (!reason) return ctx.badRequest('Rejected players must have a rejection reason');
 
+    let regDocId = id;
+    if (/^\d+$/.test(id)) {
+      const results = await strapi.documents('api::registration.registration').findMany({
+        filters: { id: Number(id) },
+        limit: 1,
+      });
+      if (results[0]) {
+        regDocId = results[0].documentId;
+      }
+    }
+
     const updated = await strapi.documents('api::registration.registration').update({
-      documentId: id,
+      documentId: regDocId,
       data: { registrationStatus: 'rejected', rejectionReason: reason },
       populate: ['tournament', 'player', 'payment'],
     });
     
-    const playerId = relationId((updated as any).player);
+    const player = (updated as any).player;
+    const playerId = player?.documentId || player?.id;
     if (playerId) {
       await strapi.documents('api::player.player').update({
         documentId: playerId,
@@ -190,7 +227,7 @@ export default factories.createCoreController('api::registration.registration', 
       });
     }
 
-    await logAction(strapi, 'registration.rejected', 'registration', id, { reason });
+    await logAction(strapi, 'registration.rejected', 'registration', regDocId, { reason });
     ctx.body = { data: updated };
   },
 }));

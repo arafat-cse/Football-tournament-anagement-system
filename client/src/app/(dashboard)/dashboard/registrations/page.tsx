@@ -27,6 +27,14 @@ export default async function RegistrationsPage() {
                   <span className="inline-flex size-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-xs font-black text-slate-600">
                     {index + 1}
                   </span>
+                  {item.photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={item.photoUrl} alt={item.name} className="size-10 shrink-0 rounded-full object-cover ring-2 ring-emerald-500/20" />
+                  ) : (
+                    <span className="grid size-10 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-black uppercase text-slate-500">
+                      {item.name.slice(0, 2)}
+                    </span>
+                  )}
                   <h2 className="truncate text-base font-black">{item.name}</h2>
                 </div>
                 <p className="mt-1 text-sm font-semibold text-slate-500">{item.role || "No role"}</p>
@@ -56,12 +64,24 @@ export default async function RegistrationsPage() {
 
       <div className="mt-6 hidden overflow-x-auto rounded-lg border bg-white shadow-sm md:block">
         <table className="w-full min-w-[1040px] text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="px-4 py-3">SL</th><th className="px-4 py-3">Name</th><th className="px-4 py-3">Phone</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Transaction</th><th className="px-4 py-3">Payment & approval</th></tr></thead>
+          <thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="px-4 py-3">SL</th><th className="px-4 py-3">Player</th><th className="px-4 py-3">Phone</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Transaction</th><th className="px-4 py-3">Payment & approval</th></tr></thead>
           <tbody>
             {registrations.map((item, index) => (
               <tr key={item.id} className="border-t">
                 <td className="px-4 py-3 text-xs font-black text-slate-500">{index + 1}</td>
-                <td className="px-4 py-3 font-semibold">{item.name}</td>
+                <td className="px-4 py-3 font-semibold">
+                  <div className="flex items-center gap-3">
+                    {item.photoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.photoUrl} alt={item.name} className="size-10 rounded-full object-cover ring-2 ring-emerald-500/20" />
+                    ) : (
+                      <span className="grid size-10 place-items-center rounded-full bg-slate-100 text-xs font-black uppercase text-slate-500">
+                        {item.name.slice(0, 2)}
+                      </span>
+                    )}
+                    <span>{item.name}</span>
+                  </div>
+                </td>
                 <td className="px-4 py-3">{item.phone}</td>
                 <td className="px-4 py-3">{item.role}</td>
                 <td className="px-4 py-3">{item.transactionId}</td>

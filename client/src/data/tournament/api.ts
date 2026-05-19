@@ -1,4 +1,4 @@
-import { getStrapiMedia, getStrapiURL, getResolvedStrapiURL } from "@/lib/utils";
+import { getStrapiMedia, getResolvedStrapiURL } from "@/lib/utils";
 import type { Auction, Player, Registration, Sponsor, Team, TeamPlayer, Tournament } from "./types";
 
 const apiUrl = getResolvedStrapiURL();
@@ -146,6 +146,7 @@ export async function getTeams(slug?: string) {
       const tournament = flattenRelation(flat.tournament);
       return {
         id: flat.id,
+        documentId: flat.documentId,
         name: flat.name,
         logoUrl: mediaUrl(flat.logo),
         ownerName: flat.ownerName ?? "",
@@ -173,6 +174,11 @@ export async function getPlayers(slug?: string) {
     `/public-players?sort=createdAt:desc&pagination[pageSize]=100${slug ? `&tournamentSlug=${encodeURIComponent(slug)}` : ""}`
   );
   if (remote?.length) {
+    const registrations = await getRegistrations(slug);
+    const registrationPhotoByPhone = new Map(
+      registrations.filter((registration) => registration.photoUrl).map((registration) => [registration.phone, registration.photoUrl])
+    );
+
     const all = remote.map((item): Player => {
       const flat = flatten(item);
       const tournament = flattenRelation(flat.tournament);
@@ -185,6 +191,7 @@ export async function getPlayers(slug?: string) {
 
       return {
         id: flat.id,
+        documentId: flat.documentId,
         name: flat.name,
         phone: flat.phone ?? "",
         email: flat.email ?? "",
@@ -192,7 +199,7 @@ export async function getPlayers(slug?: string) {
         address: flat.address ?? "",
         role: flat.role ?? "",
         experience: flat.experience ?? "",
-        photoUrl: mediaUrl(flat.photo),
+        photoUrl: mediaUrl(flat.photo) ?? registrationPhotoByPhone.get(flat.phone),
         basePrice: Number(flat.basePrice ?? 0),
         finalPrice: flat.finalPrice == null ? undefined : Number(flat.finalPrice),
         teamId: relationId(team),
@@ -225,10 +232,12 @@ export async function getTeamPlayers(slug?: string, teamId?: string | number): P
 
       return {
         id: flat.id,
+        documentId: flat.documentId,
         teamId: relationId(team) ?? 0,
         tournamentSlug: tournament?.slug ?? "",
         player: {
           id: player?.id ?? 0,
+          documentId: player?.documentId,
           name: player?.name ?? "",
           phone: player?.phone ?? "",
           email: player?.email ?? "",
@@ -267,6 +276,7 @@ export async function getTeamPlayers(slug?: string, teamId?: string | number): P
 }
 
 export async function getRegistrations(slug?: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let remote: any[] | null = null;
   const isClient = typeof window !== "undefined";
 
@@ -342,6 +352,10 @@ export async function getAuctions(slug?: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const remote = await fetchStrapi<any[]>("/public-auctions");
   if (!remote?.length) return [];
+  const registrations = await getRegistrations(slug);
+  const registrationPhotoByPhone = new Map(
+    registrations.filter((registration) => registration.photoUrl).map((registration) => [registration.phone, registration.photoUrl])
+  );
 
   const all = remote.map((item): Auction => {
     const flat = flatten(item);
@@ -354,12 +368,13 @@ export async function getAuctions(slug?: string) {
       displayStatus: flat.displayStatus ?? "live",
       player: player ? {
         id: player.id,
+        documentId: player.documentId,
         name: player.name,
         phone: player.phone ?? "",
         email: player.email ?? "",
         age: Number(player.age ?? 0),
         address: player.address ?? "",
-        photoUrl: mediaUrl(player.photo),
+        photoUrl: mediaUrl(player.photo) ?? registrationPhotoByPhone.get(player.phone),
         basePrice: Number(player.basePrice ?? 0),
         role: player.role ?? "",
         experience: player.experience ?? "",

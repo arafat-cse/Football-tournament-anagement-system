@@ -5,20 +5,48 @@ const apiUrl = getResolvedStrapiURL();
 const token = process.env.STRAPI_API_TOKEN;
 
 async function fetchStrapi<T>(path: string): Promise<T | null> {
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
+  
+  // Try using the primary configured API URL
   try {
-    const cleanPath = path.startsWith("/") ? path : `/${path}`;
     const response = await fetch(`${apiUrl}/api${cleanPath}`, {
       headers: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       cache: "no-store",
     });
-    if (!response.ok) return null;
-    const payload = await response.json();
-    return payload.data as T;
-  } catch {
-    return null;
+    if (response.ok) {
+      const payload = await response.json();
+      return payload.data as T;
+    } else {
+      console.warn(`fetchStrapi primary request returned non-OK status ${response.status} for ${cleanPath}`);
+    }
+  } catch (error) {
+    console.warn(`fetchStrapi primary request failed for ${cleanPath} using URL ${apiUrl}:`, error);
   }
+
+  // Fallback: If primary failed and apiUrl is external, try the loopback address http://127.0.0.1:3040
+  if (!apiUrl.includes("127.0.0.1") && !apiUrl.includes("localhost")) {
+    try {
+      console.log(`Attempting internal loopback fallback fetch for ${cleanPath}...`);
+      const response = await fetch(`http://127.0.0.1:3040/api${cleanPath}`, {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        cache: "no-store",
+      });
+      if (response.ok) {
+        const payload = await response.json();
+        return payload.data as T;
+      } else {
+        console.warn(`fetchStrapi loopback fallback returned non-OK status ${response.status} for ${cleanPath}`);
+      }
+    } catch (fallbackError) {
+      console.error(`fetchStrapi loopback fallback also failed for ${cleanPath}:`, fallbackError);
+    }
+  }
+
+  return null;
 }
 
 // Strapi v4/v5 can return either nested attributes or flat fields.

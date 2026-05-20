@@ -10,7 +10,9 @@ export default async function PlayerDetailsPage({ params }: { params: Promise<{ 
   await connection();
   const { slug, playerId } = await params;
   const [registrations, teams] = await Promise.all([getRegistrations(slug), getTeams(slug)]);
-  const player = registrations.find((registration) => String(registration.id) === String(playerId));
+  const player = registrations.find(
+    (registration) => String(registration.id) === String(playerId) && registration.registrationStatus === "approved"
+  );
 
   if (!player) notFound();
 

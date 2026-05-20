@@ -16,9 +16,14 @@ export default async function PlayersPage({ params }: { params: Promise<{ slug: 
           <h1 className="font-heading text-4xl font-black">Register Player List</h1>
           <p className="mt-2 text-sm text-slate-600">Only admin approved player registrations show here.</p>
         </div>
-        <a className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-bold text-white" href={`/api/exports/registrations?tournamentSlug=${slug}`}>
-          <FileSpreadsheet className="size-4" /> Download Excel
-        </a>
+        <div className="flex flex-col items-start gap-3 sm:items-end">
+          <a className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-bold text-white" href={`/api/exports/registrations?tournamentSlug=${slug}`}>
+            <FileSpreadsheet className="size-4" /> Download Excel
+          </a>
+          <div className="rounded-md border bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm">
+            Total registrations: <span className="text-lg font-black text-emerald-700">{registrations.length}</span>
+          </div>
+        </div>
       </div>
       <div className="mt-6 overflow-x-auto rounded-lg border">
         <table className="w-full min-w-[900px] text-left text-sm">

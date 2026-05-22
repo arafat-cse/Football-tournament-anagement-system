@@ -54,6 +54,10 @@ export default async function RegistrationsPage() {
                 <dd className="text-right font-bold">{item.phone || "-"}</dd>
               </div>
               <div className="flex items-center justify-between gap-3">
+                <dt className="font-semibold text-slate-500">Base price</dt>
+                <dd className="text-right font-bold">Tk {item.basePrice.toLocaleString()}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-3">
                 <dt className="font-semibold text-slate-500">Transaction</dt>
                 <dd className="max-w-40 truncate text-right font-bold">{item.transactionId || "-"}</dd>
               </div>
@@ -63,8 +67,8 @@ export default async function RegistrationsPage() {
       </div>
 
       <div className="mt-6 hidden overflow-x-auto rounded-lg border bg-white shadow-sm md:block">
-        <table className="w-full min-w-[1040px] text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="px-4 py-3">SL</th><th className="px-4 py-3">Player</th><th className="px-4 py-3">Phone</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Transaction</th><th className="px-4 py-3">Payment & approval</th></tr></thead>
+        <table className="w-full min-w-[1120px] text-left text-sm">
+          <thead className="bg-slate-50 text-xs uppercase text-slate-500"><tr><th className="px-4 py-3">SL</th><th className="px-4 py-3">Player</th><th className="px-4 py-3">Phone</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Base price</th><th className="px-4 py-3">Transaction</th><th className="px-4 py-3">Payment & approval</th></tr></thead>
           <tbody>
             {registrations.map((item, index) => (
               <tr key={item.id} className="border-t">
@@ -84,6 +88,7 @@ export default async function RegistrationsPage() {
                 </td>
                 <td className="px-4 py-3">{item.phone}</td>
                 <td className="px-4 py-3">{item.role}</td>
+                <td className="px-4 py-3 font-bold">Tk {item.basePrice.toLocaleString()}</td>
                 <td className="px-4 py-3">{item.transactionId}</td>
                 <td className="px-4 py-3">
                   <RegistrationStatusControls

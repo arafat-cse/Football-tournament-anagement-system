@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ExternalLink, Gavel, Loader2, UserPlus } from "lucide-react";
+import { ExternalLink, Gavel, Loader2, Search, UserPlus } from "lucide-react";
 
 import { StatusBadge } from "@/components/sports/status-badge";
-import type { Player, Team, Tournament } from "@/data/tournament/types";
+import type { Auction, Player, Team, Tournament } from "@/data/tournament/types";
 
 const inputClass = "h-11 rounded-md border bg-white px-3 text-sm outline-none ring-emerald-600/20 focus:ring-4 disabled:bg-slate-100 disabled:text-slate-400";
 
@@ -14,16 +14,19 @@ export function AuctionControlPanel({
   tournaments,
   teams,
   players,
+  auctions,
 }: {
   tournaments: Tournament[];
   teams: Team[];
   players: Player[];
+  auctions: Auction[];
 }) {
   const router = useRouter();
   const [tournamentId, setTournamentId] = useState("");
   const [auctionPlayerId, setAuctionPlayerId] = useState("");
+  const [playerSearch, setPlayerSearch] = useState("");
   const [teamId, setTeamId] = useState("");
-  const [assignPlayerId, setAssignPlayerId] = useState("");
+  const [livePlayerId, setLivePlayerId] = useState<number | null>(null);
   const [price, setPrice] = useState("");
   const [pendingAction, setPendingAction] = useState<"auction" | "assign" | "">("");
   const [message, setMessage] = useState("");
@@ -33,32 +36,36 @@ export function AuctionControlPanel({
   const selectedTournament = tournaments.find((item) => String(item.id) === tournamentId);
   const selectedAuctionPlayer = players.find((item) => String(item.id) === auctionPlayerId);
   const selectedTeam = teams.find((item) => String(item.id) === teamId);
-  const selectedAssignPlayer = players.find((item) => String(item.id) === assignPlayerId);
+  const currentLiveAuction = auctions.find((item) => selectedTournament && item.tournamentSlug === selectedTournament.slug && item.displayStatus === "live");
+  const currentLivePlayer = currentLiveAuction?.player;
+  const overrideLivePlayer = players.find((item) => livePlayerId != null && item.id === livePlayerId && selectedTournament && item.tournamentSlug === selectedTournament.slug);
+  const selectedAssignPlayer = overrideLivePlayer ?? currentLivePlayer;
 
-  const auctionPlayers = useMemo(
-    () =>
-      players.filter(
-        (player) =>
-          selectedTournament &&
-          player.tournamentSlug === selectedTournament.slug &&
-          player.registrationStatus === "approved" &&
-          player.paymentStatus === "paid" &&
-          player.auctionStatus !== "sold" &&
-          !player.teamId &&
-          !assignedPlayerIds.includes(player.id)
-      ),
-    [assignedPlayerIds, players, selectedTournament]
+  const auctionPlayers = players.filter(
+    (player) =>
+      selectedTournament &&
+      player.tournamentSlug === selectedTournament.slug &&
+      player.registrationStatus === "approved" &&
+      player.paymentStatus === "paid" &&
+      player.auctionStatus !== "sold" &&
+      !player.teamId &&
+      !assignedPlayerIds.includes(player.id)
   );
 
-  const filteredTeams = useMemo(
-    () =>
-      teams.filter(
-        (team) =>
-          selectedTournament &&
-          team.tournamentSlug === selectedTournament.slug &&
-          (!team.registrationStatus || team.registrationStatus === "approved")
-      ),
-    [selectedTournament, teams]
+  const playerSearchQuery = playerSearch.trim().toLowerCase();
+  const searchedAuctionPlayers = playerSearchQuery
+    ? auctionPlayers.filter((player) =>
+        [player.name, player.role, player.phone, player.email, player.experience]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(playerSearchQuery))
+      )
+    : auctionPlayers;
+
+  const filteredTeams = teams.filter(
+    (team) =>
+      selectedTournament &&
+      team.tournamentSlug === selectedTournament.slug &&
+      (!team.registrationStatus || team.registrationStatus === "approved")
   );
 
   function resetFeedback() {
@@ -69,16 +76,10 @@ export function AuctionControlPanel({
   function updateTournament(value: string) {
     setTournamentId(value);
     setAuctionPlayerId("");
+    setPlayerSearch("");
     setTeamId("");
-    setAssignPlayerId("");
+    setLivePlayerId(null);
     setPrice("");
-    resetFeedback();
-  }
-
-  function updateAssignPlayer(value: string) {
-    setAssignPlayerId(value);
-    const player = players.find((item) => String(item.id) === value);
-    setPrice(player ? String(player.basePrice) : "");
     resetFeedback();
   }
 
@@ -111,11 +112,18 @@ export function AuctionControlPanel({
     }
 
     setMessage(`${selectedAuctionPlayer?.name ?? "Player"} is now live in the auction.`);
+    setLivePlayerId(Number(auctionPlayerId));
+    setPrice(selectedAuctionPlayer ? String(selectedAuctionPlayer.basePrice) : "");
     router.refresh();
   }
 
   async function assignPlayer(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!selectedAssignPlayer) {
+      setError("Set a player to auction first.");
+      return;
+    }
+
     setPendingAction("assign");
     resetFeedback();
 
@@ -125,7 +133,7 @@ export function AuctionControlPanel({
       body: JSON.stringify({
         tournamentId: selectedTournament?.documentId ?? tournamentId,
         teamId: selectedTeam?.documentId ?? teamId,
-        playerId: selectedAssignPlayer?.documentId ?? assignPlayerId,
+        playerId: selectedAssignPlayer?.documentId ?? selectedAssignPlayer?.id,
         price: Number(price || selectedAssignPlayer?.basePrice || 0),
       }),
     }).catch(() => null);
@@ -144,9 +152,9 @@ export function AuctionControlPanel({
     }
 
     setMessage(`${selectedAssignPlayer?.name ?? "Player"} assigned successfully.`);
-    setAssignedPlayerIds((current) => [...current, Number(assignPlayerId)]);
+    setAssignedPlayerIds((current) => selectedAssignPlayer ? [...current, selectedAssignPlayer.id] : current);
     setTeamId("");
-    setAssignPlayerId("");
+    setLivePlayerId(null);
     setPrice("");
     router.refresh();
   }
@@ -171,7 +179,7 @@ export function AuctionControlPanel({
           ) : null}
         </div>
 
-        <form className="mt-5 grid gap-3 lg:grid-cols-[1fr_1fr_auto]" onSubmit={setLiveAuction}>
+        <form className="mt-5 grid gap-3 lg:grid-cols-[1fr_1fr_1fr_auto]" onSubmit={setLiveAuction}>
           <select className={inputClass} value={tournamentId} onChange={(event) => updateTournament(event.currentTarget.value)} required>
             <option value="" disabled>Select tournament</option>
             {tournaments.map((tournament) => (
@@ -179,9 +187,20 @@ export function AuctionControlPanel({
             ))}
           </select>
 
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+            <input
+              className={`${inputClass} w-full pl-9`}
+              value={playerSearch}
+              onChange={(event) => setPlayerSearch(event.currentTarget.value)}
+              placeholder={selectedTournament ? "Search player name, role, phone" : "Select tournament first"}
+              disabled={!selectedTournament}
+            />
+          </div>
+
           <select className={inputClass} value={auctionPlayerId} onChange={(event) => { setAuctionPlayerId(event.currentTarget.value); resetFeedback(); }} required disabled={!selectedTournament}>
             <option value="" disabled>{selectedTournament ? "Select registered player" : "Select tournament first"}</option>
-            {auctionPlayers.map((player) => (
+            {searchedAuctionPlayers.map((player) => (
               <option key={player.id} value={player.id}>{player.name} - {player.role} - Tk {player.basePrice.toLocaleString()}</option>
             ))}
           </select>
@@ -193,7 +212,7 @@ export function AuctionControlPanel({
         </form>
 
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {auctionPlayers.map((player) => (
+          {searchedAuctionPlayers.map((player) => (
             <button
               key={player.id}
               type="button"
@@ -219,16 +238,29 @@ export function AuctionControlPanel({
               </div>
             </button>
           ))}
-          {selectedTournament && !auctionPlayers.length ? (
+          {selectedTournament && !searchedAuctionPlayers.length ? (
             <p className="rounded-md border border-dashed p-4 text-sm font-semibold text-slate-500 md:col-span-2 xl:col-span-3">No approved paid players available for this tournament.</p>
           ) : null}
         </div>
       </section>
 
-      <form className="grid gap-4 rounded-lg border bg-white p-5 shadow-sm lg:grid-cols-4" onSubmit={assignPlayer}>
-        <div className="lg:col-span-4">
+      <form className="grid gap-4 rounded-lg border bg-white p-5 shadow-sm lg:grid-cols-[1fr_1fr_auto]" onSubmit={assignPlayer}>
+        <div className="lg:col-span-3">
           <h2 className="font-heading text-xl font-black">Assign auction player to team</h2>
-          <p className="mt-1 text-sm text-slate-500">Keep the tournament selected, then choose team and player to finalize the assignment.</p>
+          <p className="mt-1 text-sm text-slate-500">Only the player currently set to live auction can be assigned. Select a team, confirm price, then finalize.</p>
+        </div>
+
+        <div className="rounded-md border bg-amber-50 p-4 lg:col-span-3">
+          <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-700">Live auction player</p>
+          {selectedAssignPlayer ? (
+            <div className="mt-2 flex flex-wrap items-center gap-3">
+              <p className="font-heading text-lg font-black text-slate-900">{selectedAssignPlayer.name}</p>
+              <span className="rounded-md bg-white px-2 py-1 text-sm font-semibold text-slate-600">{selectedAssignPlayer.role || "Player"}</span>
+              <span className="rounded-md bg-white px-2 py-1 text-sm font-semibold text-slate-600">Base Tk {selectedAssignPlayer.basePrice.toLocaleString()}</span>
+            </div>
+          ) : (
+            <p className="mt-2 text-sm font-semibold text-slate-500">Set a player to auction first.</p>
+          )}
         </div>
 
         <select className={inputClass} value={teamId} onChange={(event) => { setTeamId(event.currentTarget.value); resetFeedback(); }} required disabled={!selectedTournament}>
@@ -238,22 +270,15 @@ export function AuctionControlPanel({
           ))}
         </select>
 
-        <select className={inputClass} value={assignPlayerId} onChange={(event) => updateAssignPlayer(event.currentTarget.value)} required disabled={!selectedTournament}>
-          <option value="" disabled>{selectedTournament ? "Select player" : "Select tournament first"}</option>
-          {auctionPlayers.map((player) => (
-            <option key={player.id} value={player.id}>{player.name} - {player.role}</option>
-          ))}
-        </select>
-
         <input className={inputClass} value={price} onChange={(event) => setPrice(event.currentTarget.value)} type="number" min="0" placeholder="Final price" />
 
-        <button className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-5 text-sm font-bold text-white disabled:opacity-60" disabled={pendingAction === "assign"}>
+        <button className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-5 text-sm font-bold text-white disabled:opacity-60" disabled={pendingAction === "assign" || !selectedAssignPlayer}>
           {pendingAction === "assign" ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
           Assign player
         </button>
 
-        {error ? <p className="rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700 lg:col-span-4">{error}</p> : null}
-        {message ? <p className="rounded-md bg-emerald-50 p-3 text-sm font-semibold text-emerald-700 lg:col-span-4">{message}</p> : null}
+        {error ? <p className="rounded-md bg-red-50 p-3 text-sm font-semibold text-red-700 lg:col-span-3">{error}</p> : null}
+        {message ? <p className="rounded-md bg-emerald-50 p-3 text-sm font-semibold text-emerald-700 lg:col-span-3">{message}</p> : null}
       </form>
     </div>
   );
